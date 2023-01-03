@@ -12,6 +12,7 @@ using namespace std;
 
 FlightManager::FlightManager() {
     readAirportsFile();
+    readAirlinesFile();
 }
 
 void FlightManager::readAirportsFile() {
@@ -27,15 +28,34 @@ void FlightManager::readAirportsFile() {
         getline(input, city, ',');
         getline(input, country, ',');
         getline(input, latitude, ',');
-        getline(input, longitude, ',');
+        getline(input, longitude, '\r');
 
         auto *airport_ = new Airport( name, city, country, stod(latitude), stod(longitude));
-        airports.insert({code, *airport_});
+        airports->addNode(code ,{*airport_});
 
     }
 
 }
 
-const unordered_map<std::string, Airport> &FlightManager::getAirports() const {
+void FlightManager::readAirlinesFile() {
+    ifstream file("../dataset/airlines.csv");
+    string line;
+    getline(file,line); // ignore first line
+
+    while(getline(file,line)) {
+        string code, name, callsign, country;
+        stringstream input(line);
+        getline(input, code, ',');
+        getline(input, name, ',');
+        getline(input, callsign, ',');
+        getline(input, country, '\r');
+
+    }
+
+
+}
+
+Graph *FlightManager::getAirports() const {
     return airports;
 }
+

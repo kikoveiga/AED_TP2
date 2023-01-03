@@ -1,12 +1,14 @@
 //
 // Created by belchior on 28-12-2022.
 //
+#include <string>
+#include <vector>
+#include "Airline.h"
+
+
 
 #ifndef AED_TP2_AIRPORT_H
 #define AED_TP2_AIRPORT_H
-
-
-#include <string>
 
 class Airport {
 
@@ -16,6 +18,7 @@ private:
     std::string country;
     double latitude;
     double longitude;
+    std::vector<Airline*> airlines;
 
 public:
     Airport(const std::string& name, const std::string& city, const std::string& country, double latitude, double longitude);
