@@ -6,12 +6,17 @@
 using namespace std;
 
 
-Airport::Airport(const string& name, const string& city, const string& country, double latitude, double longitude) {
+Airport::Airport(string& code, const string& name, const string& city, const string& country, double latitude, double longitude) {
+    this->code = code;
     this->name = name;
     this->city = city;
     this->country = country;
     this->latitude = latitude;
     this->longitude = longitude;
+}
+
+string Airport::getCode() const {
+    return code;
 }
 
 const string &Airport::getName() const {

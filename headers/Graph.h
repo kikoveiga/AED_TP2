@@ -2,8 +2,6 @@
 // Created by belchior on 29-12-2022.
 //
 
-#include <vector>
-#include <string>
 #include <list>
 #include <unordered_map>
 #include "Airport.h"
@@ -20,7 +18,7 @@ private:
         int distance;                           //weight
     };
     struct Node{
-        Airport airport;            //src
+        Airport* airport;         //src
         std::list<Edge> adj;
         bool visited;
     };
@@ -28,7 +26,10 @@ private:
     std::unordered_map<std::string, Node> nodes;
 
 public:
-    void addNode(const std::string& airport_code , const Airport& airport);
+
+    explicit Graph(int n = 1);
+
+    void addNode(Airport* airport);
     void addEdge(const std::string& src, const std::string& dest, const std::string& airline);
 
 

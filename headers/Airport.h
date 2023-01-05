@@ -1,7 +1,6 @@
 //
 // Created by belchior on 28-12-2022.
 //
-#include <string>
 #include <vector>
 #include "Airline.h"
 
@@ -13,6 +12,7 @@
 class Airport {
 
 private:
+    std::string code;
     std::string name;
     std::string city;
     std::string country;
@@ -21,16 +21,12 @@ private:
     std::vector<Airline*> airlines;
 
 public:
-    Airport(const std::string& name, const std::string& city, const std::string& country, double latitude, double longitude);
-
-    const std::string &getName() const;
-
-    const std::string &getCity() const;
-
-    const std::string &getCountry() const;
-
+    Airport(std::string& code, const std::string& name, const std::string& city, const std::string& country, double latitude, double longitude);
+    std::string getCode() const;
+    const std::string& getName() const;
+    const std::string& getCity() const;
+    const std::string& getCountry() const;
     double getLatitude() const;
-
     double getLongitude() const;
 
 

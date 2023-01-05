@@ -3,10 +3,15 @@
 //
 
 #include "../headers/Graph.h"
+#include "../headers/Calc.h"
 
-void Graph::addNode(const std::string& airport_code, const Airport& airport) {
-    nodes.insert({airport_code, { airport}});
+//there still is segmentation fault, correct addNode
+Graph::Graph(int n) {}
+
+void Graph::addNode(Airport* airport) {
+    nodes.insert({airport->getCode(), {airport, {}, false}});
 }
+
 
 void Graph::addEdge(const std::string &src, const std::string &dest, const std::string& airline) {
     auto src_node = nodes.find(src);
@@ -18,6 +23,8 @@ void Graph::addEdge(const std::string &src, const std::string &dest, const std::
 
     src_node->second.adj.push_back({ dest, airline });
 }
+
+
 
 
 

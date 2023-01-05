@@ -16,6 +16,7 @@ FlightManager::FlightManager() {
 }
 
 void FlightManager::readAirportsFile() {
+
     ifstream file("../dataset/airports.csv");
     string line;
     getline(file,line); // ignore first line
@@ -30,9 +31,8 @@ void FlightManager::readAirportsFile() {
         getline(input, latitude, ',');
         getline(input, longitude, '\r');
 
-        auto *airport_ = new Airport( name, city, country, stod(latitude), stod(longitude));
-        airports->addNode(code ,{*airport_});
-
+        Airport*  airport_ = new Airport(code, name, city, country, stod(latitude), stod(longitude));
+        airports.addNode(airport_);
     }
 
 }
@@ -50,12 +50,32 @@ void FlightManager::readAirlinesFile() {
         getline(input, callsign, ',');
         getline(input, country, '\r');
 
+        auto *airline_ = new Airline(  name, callsign, country);
+        airlines.insert({code, *airline_});
     }
-
-
 }
 
-Graph *FlightManager::getAirports() const {
+void FlightManager::readFlightsFile() {
+    ifstream file("../dataset/flights.csv");
+    string line;
+    getline(file,line); // ignore first line
+
+    while(getline(file,line)) {
+        string source, target, airline ;
+        stringstream input(line);
+        getline(input, source, ',');
+        getline(input, target, ',');
+        getline(input, airline, '\r');
+
+        airports.addEdge(source, target, airline);
+    }
+}
+
+const Graph FlightManager::getAirports() const {
     return airports;
+}
+
+const unordered_map<std::string, Airline> &FlightManager::getAirlines() const {
+    return airlines;
 }
 
