@@ -4,20 +4,22 @@
 
 #include "../headers/Airline.h"
 
-Airline::Airline(const std::string &name, const std::string &callsign, const std::string &country) {
+using namespace std;
+
+Airline::Airline(const string& name, const string& callsign, const string& country) {
     this->name = name;
     this->callsign = callsign;
     this->country = country;
 }
 
-const std::string &Airline::getName() const {
+const string& Airline::getName() const {
     return name;
 }
 
-const std::string &Airline::getCallsign() const {
+const string& Airline::getCallsign() const {
     return callsign;
 }
 
-const std::string &Airline::getCountry() const {
+const string& Airline::getCountry() const {
     return country;
 }

@@ -32,8 +32,8 @@ void FlightManager::readAirportsFile() {
         getline(input, latitude, ',');
         getline(input, longitude, '\r');
 
-        Airport*  airport_ = new Airport(code, name, city, country, stod(latitude), stod(longitude));
-        airports.addNode(airport_);
+        auto* airport = new Airport(code, name, city, country, stod(latitude), stod(longitude));
+        airports.addNode(airport);
     }
 
 }
@@ -51,8 +51,8 @@ void FlightManager::readAirlinesFile() {
         getline(input, callsign, ',');
         getline(input, country, '\r');
 
-        auto *airline_ = new Airline(  name, callsign, country);
-        airlines.insert({code, *airline_});
+        auto* airline = new Airline(  name, callsign, country);
+        airlines.insert({code, *airline});
     }
 }
 

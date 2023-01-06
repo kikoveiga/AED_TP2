@@ -21,8 +21,8 @@ private:
     std::vector<Airline*> airlines;
 
 public:
-    Airport(std::string& code, const std::string& name, const std::string& city, const std::string& country, double latitude, double longitude);
-    std::string getCode() const;
+    Airport(const std::string& code, const std::string& name, const std::string& city, const std::string& country, double latitude, double longitude);
+    const std::string& getCode() const;
     const std::string& getName() const;
     const std::string& getCity() const;
     const std::string& getCountry() const;

@@ -16,9 +16,9 @@ private:
 
 public:
     Airline(const std::string& name, const std::string& callsign, const std::string& country);
-    const std::string &getName() const;
-    const std::string &getCallsign() const;
-    const std::string &getCountry() const;
+    const std::string& getName() const;
+    const std::string& getCallsign() const;
+    const std::string& getCountry() const;
 
 };
 

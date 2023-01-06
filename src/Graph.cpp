@@ -5,7 +5,8 @@
 #include "../headers/Graph.h"
 #include "../headers/Calc.h"
 
-//there still is segmentation fault, correct addNode
+using namespace std;
+
 Graph::Graph(int n) {}
 
 void Graph::addNode(Airport* airport) {
@@ -13,7 +14,7 @@ void Graph::addNode(Airport* airport) {
 }
 
 
-void Graph::addEdge(const std::string &src, const std::string &dest, const std::string& airline) {
+void Graph::addEdge(const string& src, const string& dest, const string& airline) {
     auto src_node = nodes.find(src);
     auto dest_node = nodes.find(dest);
 
@@ -24,7 +25,7 @@ void Graph::addEdge(const std::string &src, const std::string &dest, const std::
     src_node->second.adj.push_back({ dest, airline });
 }
 
-const std::unordered_map<std::string, Graph::Node> &Graph::getNodes() const {
+const unordered_map<string, Graph::Node>& Graph::getNodes() const {
     return nodes;
 }
 
