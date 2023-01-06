@@ -13,6 +13,7 @@ using namespace std;
 FlightManager::FlightManager() {
     readAirportsFile();
     readAirlinesFile();
+    readFlightsFile();
 }
 
 void FlightManager::readAirportsFile() {

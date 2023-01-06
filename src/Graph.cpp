@@ -24,7 +24,9 @@ void Graph::addEdge(const std::string &src, const std::string &dest, const std::
     src_node->second.adj.push_back({ dest, airline });
 }
 
-
+const std::unordered_map<std::string, Graph::Node> &Graph::getNodes() const {
+    return nodes;
+}
 
 
 

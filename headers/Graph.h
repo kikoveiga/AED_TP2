@@ -32,7 +32,7 @@ public:
     void addNode(Airport* airport);
     void addEdge(const std::string& src, const std::string& dest, const std::string& airline);
 
-
+    const std::unordered_map<std::string, Node> &getNodes() const;
 
 
 };
