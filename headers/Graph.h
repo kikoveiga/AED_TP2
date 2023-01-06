@@ -15,7 +15,7 @@ private:
     struct Edge {
         std::string destination;    //dest
         std::string airline;
-        int distance;                           //weight
+        double distance;                           //weight
     };
     struct Node{
         Airport* airport;         //src
@@ -30,7 +30,7 @@ public:
     explicit Graph(int n = 1);
 
     void addNode(Airport* airport);
-    void addEdge(const std::string& src, const std::string& dest, const std::string& airline);
+    void addEdge(const std::string& src, const std::string& dest, const std::string& airline, double distance);
 
     const std::unordered_map<std::string, Node> &getNodes() const;
 

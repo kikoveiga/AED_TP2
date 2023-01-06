@@ -4,6 +4,7 @@
 
 #include "../headers/FlightManager.h"
 #include "../headers/Airport.h"
+#include "../headers/Calc.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -67,8 +68,10 @@ void FlightManager::readFlightsFile() {
         getline(input, source, ',');
         getline(input, target, ',');
         getline(input, airline, '\r');
-
-        airports.addEdge(source, target, airline);
+        Airport* source_airport = airports.getNodes().at(source).airport;
+        Airport* target_airport = airports.getNodes().at(target).airport;
+        double distance = haversine(source_airport->getLatitude(), source_airport->getLongitude(), target_airport->getLatitude(), target_airport->getLongitude());
+        airports.addEdge(source, target, airline, distance);
     }
 }
 

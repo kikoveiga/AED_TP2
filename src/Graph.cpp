@@ -14,7 +14,7 @@ void Graph::addNode(Airport* airport) {
 }
 
 
-void Graph::addEdge(const string& src, const string& dest, const string& airline) {
+void Graph::addEdge(const string& src, const string& dest, const string& airline, double distance) {
     auto src_node = nodes.find(src);
     auto dest_node = nodes.find(dest);
 
@@ -22,7 +22,7 @@ void Graph::addEdge(const string& src, const string& dest, const string& airline
         return;
     }
 
-    src_node->second.adj.push_back({ dest, airline });
+    src_node->second.adj.push_back({ dest, airline, distance });
 }
 
 const unordered_map<string, Graph::Node>& Graph::getNodes() const {
