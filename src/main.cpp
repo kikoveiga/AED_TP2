@@ -9,6 +9,12 @@ int main() {
     std::cout << m.size();
     for (auto & j: a.getNodes()) std::cout << j.first << " ----- " << j.second.airport->getName() << " ------ " << j.second.airport->getCity() << '\n';
     std::cout << a.getNodes().size();
+
+    for (auto & k: a.getNodes()) {
+        for (auto & l: k.second.adj) {
+            std::cout << l.destination<< " ------ " << l.airline << '\n';
+        }
+    }
     return 0;
 
 }
