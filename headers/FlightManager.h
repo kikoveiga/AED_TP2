@@ -15,12 +15,12 @@ private:
     Graph graph;
     std::unordered_map<std::string, Airline*> airlines;
 public:
-    explicit FlightManager();
+    explicit FlightManager(bool include = true, const std::list<std::string>& airlinesChosen = {});
     void readAirportsFile();
-    void readAirlinesFile();
-    void readFlightsFile();
+    void readAirlinesFile(bool include, const std::list<std::string>& airlinesChosen);
+    void readFlightsFile(bool include, const std::list<std::string>& airlinesChosen);
 
-    const Graph& getGraph() const;
+    Graph& getGraph();
     const std::unordered_map<std::string, Airline*>& getAirlines() const;
 };
 

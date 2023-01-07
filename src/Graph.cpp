@@ -5,6 +5,9 @@
 #include "../headers/Graph.h"
 #include <queue>
 #include <iostream>
+#include <algorithm>
+#include <list>
+#include <string>
 
 using namespace std;
 
@@ -17,9 +20,9 @@ void Graph::addNode(Airport* airport) {
 
 void Graph::addEdge(const string& src, const string& dest, const string& airline) {
 
-    auto& srcNode = nodes[src];
+    auto &srcNode = nodes[src];
 
-    for (auto& i : srcNode.adj) {
+    for (auto &i: srcNode.adj) {
         if (i.destination == dest) {
             i.airlines.push_back(airline);
             return;
@@ -27,11 +30,9 @@ void Graph::addEdge(const string& src, const string& dest, const string& airline
     }
 
     int distance = Calc::haversine(srcNode.airport->getLatitude(), srcNode.airport->getLongitude(),
-                               nodes[dest].airport->getLatitude(), nodes[dest].airport->getLongitude());
+                                   nodes[dest].airport->getLatitude(), nodes[dest].airport->getLongitude());
 
     srcNode.adj.push_back({dest, {airline}, distance});
-
-
 }
 
 void Graph::setAllNodesUnvisited() {
@@ -46,6 +47,24 @@ void Graph::setAllNodesDist0() {
     }
 }
 
+void Graph::dfs(const string& src) {
+
+    auto& srcNode = nodes[src];
+
+    srcNode.visited = true;
+
+    for (auto& i : srcNode.adj) {
+        if (!nodes[i.destination].visited) {
+            dfs(i.destination);
+        }
+    }
+
+}
+
+void dfsArticulationPoints (int v) {
+
+}
+
 void Graph::dfsBestPaths(const string& src, const string& dest, vector<string>& path) {
 
     path[nodes[src].dist] = src;
@@ -56,8 +75,11 @@ void Graph::dfsBestPaths(const string& src, const string& dest, vector<string>& 
         for (auto i : path) {
             cout << i << " ";
         }
+
+
         cout << endl;
-        return;
+
+
     }
     nodes[src].visited = true;
 
@@ -115,12 +137,11 @@ const unordered_map<string, Graph::Node>& Graph::getNodes() const {
     return nodes;
 }
 
-const list<string> Graph::airportsInCity(const string& city) const {
+list<string> Graph::airportsInCity(const string& city) const {
 
     list<string> aeroportos;
 
     for (auto& i : nodes) {
-
         if (i.second.airport->getCity() == city) {
             aeroportos.push_back(i.first);
         }
@@ -128,7 +149,7 @@ const list<string> Graph::airportsInCity(const string& city) const {
     return aeroportos;
 }
 
-const list<string>Graph::airportsNearLocation(const double &latitude, const double &longitude, const double &radius) const {
+list<string>Graph::airportsNearLocation(const double latitude, const double longitude, const double radius) const {
 
     list<string> aeroportos;
 
@@ -140,6 +161,35 @@ const list<string>Graph::airportsNearLocation(const double &latitude, const doub
     }
     return aeroportos;
 }
+
+int Graph::getNumberFlightsFromAirport(const string &airportCode) {
+    return nodes.at(airportCode).adj.size();;
+}
+
+int Graph::connectedCompontents() {
+    int counter = 0;
+
+    for (auto& i : nodes) {
+        if (!nodes[i.first].visited) {
+            counter++;
+            dfs(i.first);
+        }
+    }
+    return counter;
+}
+
+int Graph::diameter() {
+
+    int diameter = 0;
+
+    nodes["OPO"].visited = true;
+
+}
+
+
+
+
+
 
 
 

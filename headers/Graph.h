@@ -40,13 +40,18 @@ public:
     void setAllNodesUnvisited();
     void setAllNodesDist0();
 
-    void dfsBestPaths(const std::string& src, const std::string& dest, std::vector<std::string>& path);
+    void dfs(const std::string& src);
     void bfs(const std::string& src);
+    void dfsBestPaths(const std::string& src, const std::string& dest, std::vector<std::string>& path);
     void findBestPaths(const std::string& src, const std::string& dest);
 
+    int connectedCompontents();
+    int diameter();
+
     const std::unordered_map<std::string, Node>& getNodes() const;
-    const std::list<std::string> airportsInCity(const std::string& city) const;
-    const std::list<std::string> airportsNearLocation(const double& latitude, const double& longitude, const double& radius) const;
+    std::list<std::string> airportsInCity(const std::string& city) const;
+    std::list<std::string> airportsNearLocation(const double latitude, const double longitude, const double radius) const;
+    int getNumberFlightsFromAirport(const std::string &airportCode);
 
 
 };

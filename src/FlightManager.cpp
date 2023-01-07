@@ -10,10 +10,10 @@
 
 using namespace std;
 
-FlightManager::FlightManager() {
+FlightManager::FlightManager(bool include, const list<string>& airlinesChosen) {
     readAirportsFile();
-    readAirlinesFile();
-    readFlightsFile();
+    readAirlinesFile(include, airlinesChosen);
+    readFlightsFile(include, airlinesChosen);
 }
 
 void FlightManager::readAirportsFile() {
@@ -38,7 +38,7 @@ void FlightManager::readAirportsFile() {
 
 }
 
-void FlightManager::readAirlinesFile() {
+void FlightManager::readAirlinesFile(bool include, const list<string>& airlinesChosen) {
     ifstream file("../dataset/airlines.csv");
     string line;
     getline(file,line); // ignore first line
@@ -51,12 +51,39 @@ void FlightManager::readAirlinesFile() {
         getline(input, callsign, ',');
         getline(input, country, '\r');
 
-        auto* airline = new Airline(code, name, callsign, country);
-        airlines.insert({code, airline});
+        if (airlinesChosen.empty()) {
+            auto* airline = new Airline(code, name, callsign, country);
+            airlines.insert({code, airline});
+            continue;
+        }
+
+        if (!include) {
+            bool add = true;
+
+            for (auto& i : airlinesChosen) {
+                if (i == code) {
+                    add = false;
+                }
+            }
+
+            if (add) {
+                auto* airline = new Airline(code, name, callsign, country);
+                airlines.insert({code, airline});
+            }
+            continue;
+        }
+
+        for (auto& i : airlinesChosen) {
+            if (i == code) {
+                auto* airline = new Airline(code, name, callsign, country);
+                airlines.insert({code, airline});
+                continue;
+            }
+        }
     }
 }
 
-void FlightManager::readFlightsFile() {
+void FlightManager::readFlightsFile(bool include, const list<string>& airlinesChosen) {
     ifstream file("../dataset/flights.csv");
     string line;
     getline(file,line); // ignore first line
@@ -68,11 +95,36 @@ void FlightManager::readFlightsFile() {
         getline(input, target, ',');
         getline(input, airline, '\r');
 
-        graph.addEdge(source, target, airline);
+        if (airlinesChosen.empty()) {
+            graph.addEdge(source, target, airline);
+            continue;
+        }
+
+        if (!include) {
+
+            bool add = true;
+
+            for (auto& i : airlinesChosen) {
+                if (i == airline) {
+                    add = false;
+                }
+            }
+
+            if (add) graph.addEdge(source, target, airline);
+
+            continue;
+        }
+
+        for (auto& i : airlinesChosen) {
+            if (i == airline) {
+                graph.addEdge(source, target, airline);
+                continue;
+            }
+        }
     }
 }
 
-const Graph& FlightManager::getGraph() const {
+Graph& FlightManager::getGraph() {
     return graph;
 }
 

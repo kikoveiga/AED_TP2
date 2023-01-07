@@ -4,18 +4,11 @@
 using namespace std;
 
 int main() {
-
+    /*
     FlightManager flightManager;
 
+
     Graph grafo = flightManager.getGraph();
-
-
-    /*for (auto i : a.getNodes()) {
-
-        for (auto j : i.second->adj) {
-            cout << i.second->airport->getCode() << " " << j->destination << " " << j->airlines.size() << endl;
-        }
-    }*/
 
     grafo.findBestPaths("OPO", "MIA");
 
@@ -25,11 +18,15 @@ int main() {
         cout << i << endl;
     }
     cout << endl;
-    list<string> aeroportos2 = grafo.airportsNearLocation(41.0, -8.0, 400);
+    list<string> aeroportos2 = grafo.airportsNearLocation(41.0, -8.0, 300);
 
     for (auto i : aeroportos2) {
         cout << i << endl;
     }
 
+    cout << grafo.connectedCompontents();
+    */
+    Menu menu;
+    menu.build();
     return 0;
 }

@@ -6,6 +6,9 @@
 #define AED_TP2_MENU_H
 
 #include "FlightManager.h"
+#include "../headers/Menu.h"
+#include "../headers/FlightManager.h"
+#include "../headers/Graph.h"
 
 class Menu {
 
@@ -14,9 +17,13 @@ private:
     std::string command;
 
 public:
-    explicit Menu(FlightManager& flightManager);
+    explicit Menu();
     void run();
+    void build();
     void mainMenu();
+    void cleanTerminal();
+
+    void menu1();
 
 };
 
