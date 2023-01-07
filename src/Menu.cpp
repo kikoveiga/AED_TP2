@@ -77,7 +77,6 @@ void Menu::run() {
                 mainMenu();
                 break;
             case 2:
-                flightManager.getGraph().findBestPaths("OPO", "NRT");
                 running = false;
                 break;
 

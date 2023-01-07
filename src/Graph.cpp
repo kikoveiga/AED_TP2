@@ -61,38 +61,6 @@ void Graph::dfs(const string& src) {
 
 }
 
-void dfsArticulationPoints (int v) {
-
-}
-
-void Graph::dfsBestPaths(const string& src, const string& dest, vector<string>& path) {
-
-    path[nodes[src].dist] = src;
-
-    if (src == dest) {
-
-        cout << "Best path: ";
-        for (auto i : path) {
-            cout << i << " ";
-        }
-
-
-        cout << endl;
-
-
-    }
-    nodes[src].visited = true;
-
-    for (auto& e : nodes[src].adj) {
-        string next = e.destination;
-        if (!nodes[next].visited && nodes[next].dist == nodes[src].dist + 1 && nodes[next].dist < path.size()) {
-
-            dfsBestPaths(next, dest, path);
-        }
-    }
-    nodes[src].visited = false;
-}
-
 void Graph::bfs(const string& src) {
 
     setAllNodesDist0();
@@ -116,21 +84,42 @@ void Graph::bfs(const string& src) {
     }
 }
 
-void Graph::findBestPaths(const std::string& src, const std::string& dest) {
+void dfsArticulationPoints (int v) {
+
+}
+
+void Graph::dfsBestPaths(const string& src, const string& dest, map<int, vector<string>>& bestPaths, vector<string>& path, int distanceSum) {
+
+    path[nodes[src].dist] = src;
+    distanceSum += Calc::haversine(nodes[src].airport->getLatitude(), nodes[src].airport->getLongitude(),
+                                   nodes[dest].airport->getLatitude(), nodes[dest].airport->getLongitude());
+
+    if (src == dest) bestPaths.insert({distanceSum, path});
+
+    nodes[src].visited = true;
+
+    for (auto& e : nodes[src].adj) {
+        string next = e.destination;
+        if (!nodes[next].visited && nodes[next].dist == nodes[src].dist + 1 && nodes[next].dist < path.size()) {
+
+            dfsBestPaths(next, dest, bestPaths, path, distanceSum);
+        }
+    }
+    nodes[src].visited = false;
+}
+
+void Graph::findBestPaths(const std::string& src, const std::string& dest, map<int, vector<string>> &bestPaths) {
 
     bfs(src);
 
     if(nodes[dest].dist == 0) {
-        cout << "No path found" << endl;
         return;
     }
 
     setAllNodesUnvisited();
 
     vector<string> path(nodes[dest].dist + 1);
-    dfsBestPaths(src, dest, path);
-
-    cout << "Best path found: " << nodes[dest].dist << " flight(s)" << endl;
+    dfsBestPaths(src, dest, bestPaths, path, 0);
 }
 
 const unordered_map<string, Graph::Node>& Graph::getNodes() const {
@@ -149,14 +138,15 @@ list<string> Graph::airportsInCity(const string& city) const {
     return aeroportos;
 }
 
-list<string>Graph::airportsNearLocation(const double latitude, const double longitude, const double radius) const {
+map<int, string>Graph::airportsNearLocation(const double latitude, const double longitude, const double radius) const {
 
-    list<string> aeroportos;
+    map<int, string> aeroportos;
 
     for (auto& i : nodes) {
 
-        if (Calc::haversine(latitude, longitude, i.second.airport->getLatitude(), i.second.airport->getLongitude()) <= radius) {
-            aeroportos.push_back(i.first);
+        int distance = Calc::haversine(latitude, longitude, i.second.airport->getLatitude(), i.second.airport->getLongitude());
+        if (distance <= radius) {
+            aeroportos.insert({distance, i.first});
         }
     }
     return aeroportos;
@@ -166,7 +156,7 @@ int Graph::getNumberFlightsFromAirport(const string &airportCode) {
     return nodes.at(airportCode).adj.size();;
 }
 
-int Graph::connectedCompontents() {
+int Graph::connectedComponents() {
     int counter = 0;
 
     for (auto& i : nodes) {

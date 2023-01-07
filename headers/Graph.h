@@ -3,6 +3,7 @@
 //
 
 #include <list>
+#include <map>
 #include <vector>
 #include <unordered_map>
 #include "Airport.h"
@@ -42,15 +43,16 @@ public:
 
     void dfs(const std::string& src);
     void bfs(const std::string& src);
-    void dfsBestPaths(const std::string& src, const std::string& dest, std::vector<std::string>& path);
-    void findBestPaths(const std::string& src, const std::string& dest);
 
-    int connectedCompontents();
+    void findBestPaths(const std::string& src, const std::string& dest, std::map<int, std::vector<std::string>>& bestPaths);
+    void dfsBestPaths(const std::string& src, const std::string& dest, std::map<int, std::vector<std::string>>& bestPaths, std::vector<std::string>& path, int distanceSum);
+
+    int connectedComponents();
     int diameter();
 
     const std::unordered_map<std::string, Node>& getNodes() const;
     std::list<std::string> airportsInCity(const std::string& city) const;
-    std::list<std::string> airportsNearLocation(const double latitude, const double longitude, const double radius) const;
+    std::map<int, std::string> airportsNearLocation(const double latitude, const double longitude, const double radius) const;
     int getNumberFlightsFromAirport(const std::string &airportCode);
 
 
