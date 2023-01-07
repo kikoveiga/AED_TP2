@@ -18,7 +18,7 @@ private:
     std::string country;
     double latitude;
     double longitude;
-    std::vector<Airline*> airlines;
+
 
 public:
     Airport(const std::string& code, const std::string& name, const std::string& city, const std::string& country, double latitude, double longitude);

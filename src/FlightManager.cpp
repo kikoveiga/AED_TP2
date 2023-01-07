@@ -34,7 +34,7 @@ void FlightManager::readAirportsFile() {
         getline(input, longitude, '\r');
 
         auto* airport = new Airport(code, name, city, country, stod(latitude), stod(longitude));
-        airports.addNode(airport);
+        graph.addNode(airport);
     }
 
 }
@@ -68,15 +68,15 @@ void FlightManager::readFlightsFile() {
         getline(input, source, ',');
         getline(input, target, ',');
         getline(input, airline, '\r');
-        Airport* source_airport = airports.getNodes().at(source).airport;
-        Airport* target_airport = airports.getNodes().at(target).airport;
-        double distance = haversine(source_airport->getLatitude(), source_airport->getLongitude(), target_airport->getLatitude(), target_airport->getLongitude());
-        airports.addEdge(source, target, airline, distance);
+        Airport* source_airport = graph.getNodes().at(source)->airport;
+        Airport* target_airport = graph.getNodes().at(target)->airport;
+        double distance = Calc::haversine(source_airport->getLatitude(), source_airport->getLongitude(), target_airport->getLatitude(), target_airport->getLongitude());
+        graph.addEdge(source, target, airline, distance);
     }
 }
 
-const Graph FlightManager::getAirports() const {
-    return airports;
+const Graph FlightManager::getGraph() const {
+    return graph;
 }
 
 const unordered_map<std::string, Airline> &FlightManager::getAirlines() const {

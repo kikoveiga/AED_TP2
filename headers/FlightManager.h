@@ -12,7 +12,7 @@
 
 class FlightManager {
 private:
-    Graph airports;
+    Graph graph;
     std::unordered_map<std::string, Airline> airlines;
 public:
     explicit FlightManager();
@@ -20,8 +20,8 @@ public:
     void readAirlinesFile();
     void readFlightsFile();
 
-    const Graph getAirports() const;
-    const std::unordered_map<std::string, Airline> &getAirlines() const;
+    const Graph getGraph() const;
+    const std::unordered_map<std::string, Airline>& getAirlines() const;
 
 
 };

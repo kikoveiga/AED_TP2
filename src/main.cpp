@@ -6,19 +6,20 @@ using namespace std;
 
 int main() {
     auto fm = new FlightManager();
-    auto a = fm->getAirports();
+    auto a = fm->getGraph();
     auto m = fm->getAirlines();
-    //testing airports, airlines and flights
-    //for (auto & i : m) cout << i.first << " ----- " << i.second.getName() << '\n';
-    //cout << m.size();
-    //for (auto & j: a.getNodes()) std::cout << j.first << " ----- " << j.second.airport->getName() << " ------ " << j.second.airport->getCity() << '\n';
-    //cout << a.getNodes().size();
 
-    for (auto & k: a.getNodes()) {
-        for (auto & l: k.second.adj) {
-            cout << l.destination<< " ------ " << l.airline << " ------ " << l.distance <<'\n';
+    /*for (auto i : a.getNodes()) {
+
+        for (auto j : i.second->adj) {
+            cout << i.second->airport->getCode() << " " << j->destination << " " << j->airlines.size() << endl;
         }
-    }
+    }*/
+
+    a.findBestPaths("OPO", "TBU");
+
+
+
     return 0;
 
 }
