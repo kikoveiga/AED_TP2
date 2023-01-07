@@ -12,7 +12,8 @@
 //in this graph each airport will be a node and each flight will be an edge and the weight of them will be the distance
 
 class Graph {
-public:
+
+private:
     struct Edge {
         std::string destination;    //dest
         std::list<std::string> airlines;

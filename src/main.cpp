@@ -16,7 +16,7 @@ int main() {
         }
     }*/
 
-    a.findBestPaths("OPO", "TBU");
+    a.findBestPaths("OPO", "MIA");
 
 
 
