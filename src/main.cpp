@@ -1,13 +1,14 @@
 #include <iostream>
-#include "../headers/FlightManager.h"
-#include "../headers/Airport.h"
+#include "../headers/Menu.h"
 
 using namespace std;
 
 int main() {
-    auto fm = new FlightManager();
-    auto a = fm->getGraph();
-    auto m = fm->getAirlines();
+
+    FlightManager flightManager;
+
+    Graph grafo = flightManager.getGraph();
+
 
     /*for (auto i : a.getNodes()) {
 
@@ -16,10 +17,19 @@ int main() {
         }
     }*/
 
-    a.findBestPaths("OPO", "MIA");
+    grafo.findBestPaths("OPO", "MIA");
 
+    list<string> aeroportos = grafo.airportsInCity("Dubai");
 
+    for (auto i : aeroportos) {
+        cout << i << endl;
+    }
+    cout << endl;
+    list<string> aeroportos2 = grafo.airportsNearLocation(41.0, -8.0, 400);
+
+    for (auto i : aeroportos2) {
+        cout << i << endl;
+    }
 
     return 0;
-
 }

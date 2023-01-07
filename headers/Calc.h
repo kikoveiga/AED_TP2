@@ -9,7 +9,7 @@ class Calc {
 
 public:
 
-    static double haversine(double lat1, double lon1, double lat2, double lon2);
+    static int haversine(double lat1, double lon1, double lat2, double lon2);
 };
 
 

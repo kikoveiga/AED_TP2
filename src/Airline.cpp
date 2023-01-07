@@ -6,10 +6,14 @@
 
 using namespace std;
 
-Airline::Airline(const string& name, const string& callsign, const string& country) {
+Airline::Airline(const string& code, const string& name, const string& callsign, const string& country) {
+    this->code = code;
     this->name = name;
     this->callsign = callsign;
     this->country = country;
+}
+const string& Airline::getCode() const {
+    return code;
 }
 
 const string& Airline::getName() const {

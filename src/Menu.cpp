@@ -4,7 +4,7 @@
 
 #include "../headers/Menu.h"
 
-Menu::Menu(FlightManager* flightManager) {
+Menu::Menu(FlightManager& flightManager) {
     this->flightManager = flightManager;
     this->command = "0";
 }
@@ -26,6 +26,9 @@ void Menu::run() {
                 break;
         }
     }
+}
+
+void Menu::mainMenu() {
 
 }
 

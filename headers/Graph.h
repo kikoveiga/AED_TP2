@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include "Airport.h"
+#include "Calc.h"
 #ifndef AED_TP2_GRAPH_H
 #define AED_TP2_GRAPH_H
 
@@ -17,31 +18,35 @@ private:
     struct Edge {
         std::string destination;    //dest
         std::list<std::string> airlines;
-        double distance;                           //weight
+        int distance;                           //weight
     };
     struct Node{
         Airport* airport;         //src
-        std::list<Edge*> adj;
+        std::list<Edge> adj;
         bool visited;
         int dist;
     };
 
-    std::unordered_map<std::string, Node*> nodes;
+    std::unordered_map<std::string, Node> nodes;
 
 public:
 
-    explicit Graph(int n = 1);
+    explicit Graph();
 
 
     void addNode(Airport* airport);
-    void addEdge(const std::string& src, const std::string& dest, const std::string& airline, double distance);
+    void addEdge(const std::string& src, const std::string& dest, const std::string& airline);
+
     void setAllNodesUnvisited();
     void setAllNodesDist0();
+
     void dfsBestPaths(const std::string& src, const std::string& dest, std::vector<std::string>& path);
     void bfs(const std::string& src);
     void findBestPaths(const std::string& src, const std::string& dest);
 
-    const std::unordered_map<std::string, Node*>& getNodes() const;
+    const std::unordered_map<std::string, Node>& getNodes() const;
+    const std::list<std::string> airportsInCity(const std::string& city) const;
+    const std::list<std::string> airportsNearLocation(const double& latitude, const double& longitude, const double& radius) const;
 
 
 };

@@ -10,11 +10,11 @@
 class Menu {
 
 private:
-    FlightManager* flightManager;
+    FlightManager flightManager;
     std::string command;
 
 public:
-    explicit Menu(FlightManager* flightManager);
+    explicit Menu(FlightManager& flightManager);
     void run();
     void mainMenu();
 

@@ -3,8 +3,7 @@
 //
 
 #include "../headers/FlightManager.h"
-#include "../headers/Airport.h"
-#include "../headers/Calc.h"
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -52,8 +51,8 @@ void FlightManager::readAirlinesFile() {
         getline(input, callsign, ',');
         getline(input, country, '\r');
 
-        auto* airline = new Airline(  name, callsign, country);
-        airlines.insert({code, *airline});
+        auto* airline = new Airline(code, name, callsign, country);
+        airlines.insert({code, airline});
     }
 }
 
@@ -68,18 +67,16 @@ void FlightManager::readFlightsFile() {
         getline(input, source, ',');
         getline(input, target, ',');
         getline(input, airline, '\r');
-        Airport* source_airport = graph.getNodes().at(source)->airport;
-        Airport* target_airport = graph.getNodes().at(target)->airport;
-        double distance = Calc::haversine(source_airport->getLatitude(), source_airport->getLongitude(), target_airport->getLatitude(), target_airport->getLongitude());
-        graph.addEdge(source, target, airline, distance);
+
+        graph.addEdge(source, target, airline);
     }
 }
 
-const Graph FlightManager::getGraph() const {
+const Graph& FlightManager::getGraph() const {
     return graph;
 }
 
-const unordered_map<std::string, Airline> &FlightManager::getAirlines() const {
+const unordered_map<std::string, Airline*>& FlightManager::getAirlines() const {
     return airlines;
 }
 

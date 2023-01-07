@@ -9,18 +9,19 @@
 
 class Airline {
 private:
+    std::string code;
     std::string name;
     std::string callsign;
     std::string country;
 
 
 public:
-    Airline(const std::string& name, const std::string& callsign, const std::string& country);
+    Airline(const std::string& code, const std::string& name, const std::string& callsign, const std::string& country);
+    const std::string& getCode() const;
     const std::string& getName() const;
     const std::string& getCallsign() const;
     const std::string& getCountry() const;
 
 };
-
 
 #endif //AED_TP2_AIRLINE_H

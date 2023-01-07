@@ -3,52 +3,52 @@
 //
 
 #include "../headers/Graph.h"
-#include "../headers/Calc.h"
 #include <queue>
 #include <iostream>
 
 using namespace std;
 
-Graph::Graph(int n) {}
+Graph::Graph() {}
 
 void Graph::addNode(Airport* airport) {
-    nodes.insert({airport->getCode(), new Node {airport, {}, false}});
+    nodes.insert({airport->getCode(), {airport, {}, false}});
 }
 
 
-void Graph::addEdge(const string& src, const string& dest, const string& airline, double distance) {
+void Graph::addEdge(const string& src, const string& dest, const string& airline) {
 
-    //Why is the vector of airlines not working, in the end every node only has one airline to a different destination
-    //nodes[src].adj.push_back({dest, airline, distance});
-    auto srcNode = nodes[src];
+    auto& srcNode = nodes[src];
 
-    for (auto i : srcNode->adj) {
-        if (i->destination == dest) {
-            i->airlines.push_back(airline);
+    for (auto& i : srcNode.adj) {
+        if (i.destination == dest) {
+            i.airlines.push_back(airline);
             return;
         }
     }
 
-    srcNode->adj.push_back(new Edge {dest, {airline}, distance});
+    int distance = Calc::haversine(srcNode.airport->getLatitude(), srcNode.airport->getLongitude(),
+                               nodes[dest].airport->getLatitude(), nodes[dest].airport->getLongitude());
+
+    srcNode.adj.push_back({dest, {airline}, distance});
 
 
 }
 
 void Graph::setAllNodesUnvisited() {
-    for (auto i : nodes) {
-        i.second->visited = false;
+    for (auto& i : nodes) {
+        i.second.visited = false;
     }
 }
 
 void Graph::setAllNodesDist0() {
-    for (auto i : nodes) {
-        i.second->dist = 0;
+    for (auto& i : nodes) {
+        i.second.dist = 0;
     }
 }
 
 void Graph::dfsBestPaths(const string& src, const string& dest, vector<string>& path) {
 
-    path[nodes[src]->dist] = src;
+    path[nodes[src].dist] = src;
 
     if (src == dest) {
 
@@ -59,17 +59,16 @@ void Graph::dfsBestPaths(const string& src, const string& dest, vector<string>& 
         cout << endl;
         return;
     }
-    nodes[src]->visited = true;
+    nodes[src].visited = true;
 
-    for (auto e : nodes[src]->adj) {
-        string next = e->destination;
-        if (!nodes[next]->visited && nodes[next]->dist == nodes[src]->dist + 1 && nodes[next]->dist < path.size()) {
+    for (auto& e : nodes[src].adj) {
+        string next = e.destination;
+        if (!nodes[next].visited && nodes[next].dist == nodes[src].dist + 1 && nodes[next].dist < path.size()) {
 
             dfsBestPaths(next, dest, path);
         }
     }
-    nodes[src]->visited = false;
-    return;
+    nodes[src].visited = false;
 }
 
 void Graph::bfs(const string& src) {
@@ -79,45 +78,67 @@ void Graph::bfs(const string& src) {
 
     queue<string> q; // queue of unvisited nodes
     q.push(src);
-    nodes[src]->visited = true;
+    nodes[src].visited = true;
     while (!q.empty()) { // while there are still unvisited nodes
         string u = q.front(); q.pop();
         // show node order
         //cout << u << " ";
-        for (auto e : nodes[u]->adj) {
-            string w = e->destination;
-            if (!nodes[w]->visited) {
+        for (auto& e : nodes[u].adj) {
+            string w = e.destination;
+            if (!nodes[w].visited) {
                 q.push(w);
-                nodes[w]->visited = true;
-                nodes[w]->dist = nodes[u]->dist + 1;
+                nodes[w].visited = true;
+                nodes[w].dist = nodes[u].dist + 1;
             }
         }
     }
 }
 
-void Graph::findBestPaths(const std::string &src, const std::string &dest) {
+void Graph::findBestPaths(const std::string& src, const std::string& dest) {
 
     bfs(src);
-    if(nodes[dest]->dist == 0) {
+
+    if(nodes[dest].dist == 0) {
         cout << "No path found" << endl;
         return;
     }
 
     setAllNodesUnvisited();
 
-    if(nodes[dest]->dist == 0) {
-        cout << "No path found" << endl;
-        return;
-    }
-
-    vector<string> path(nodes[dest]->dist + 1);
+    vector<string> path(nodes[dest].dist + 1);
     dfsBestPaths(src, dest, path);
 
-    cout << "Best path found: " << nodes[dest]->dist << " flight(s)" << endl;
+    cout << "Best path found: " << nodes[dest].dist << " flight(s)" << endl;
 }
 
-const unordered_map<string, Graph::Node*>& Graph::getNodes() const {
+const unordered_map<string, Graph::Node>& Graph::getNodes() const {
     return nodes;
+}
+
+const list<string> Graph::airportsInCity(const string& city) const {
+
+    list<string> aeroportos;
+
+    for (auto& i : nodes) {
+
+        if (i.second.airport->getCity() == city) {
+            aeroportos.push_back(i.first);
+        }
+    }
+    return aeroportos;
+}
+
+const list<string>Graph::airportsNearLocation(const double &latitude, const double &longitude, const double &radius) const {
+
+    list<string> aeroportos;
+
+    for (auto& i : nodes) {
+
+        if (Calc::haversine(latitude, longitude, i.second.airport->getLatitude(), i.second.airport->getLongitude()) <= radius) {
+            aeroportos.push_back(i.first);
+        }
+    }
+    return aeroportos;
 }
 
 
