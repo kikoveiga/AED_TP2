@@ -11,7 +11,7 @@
 
 using namespace std;
 
-Graph::Graph() {}
+Graph::Graph() = default;
 
 void Graph::addNode(Airport* airport) {
     nodes.insert({airport->getCode(), {airport, {}, false}});
@@ -47,18 +47,111 @@ void Graph::setAllNodesDistance0() {
     }
 }
 
-void Graph::dfs(const string& src, int& counter) {
+void Graph::setAllNodesIndexTarjan() {
+    for (auto& i : nodes) {
+        i.second.indexTarjan = -1;
+    }
+}
 
-    auto& srcNode = nodes[src];
+void Graph::setAllNodesLowTarjan() {
+    for (auto& i : nodes) {
+        i.second.lowTarjan = -1;
+    }
+}
 
+void Graph::dfsArticulationPoints(const string& src, list<string>& articulationPoints) {
+    auto &srcNode = nodes[src];
     srcNode.visited = true;
+    srcNode.lowTarjan = srcNode.indexTarjan;
 
-    for (auto& i : srcNode.adj) {
-        if (!(nodes[i.destination].visited)) {
-            dfs(i.destination, ++counter);
+    int children = 0;
+
+    for (auto &i : srcNode.adj) {
+        auto &destNode = nodes[i.destination];
+
+        if (!destNode.visited) {
+            children++;
+            dfsArticulationPoints(i.destination, articulationPoints);
+
+            srcNode.lowTarjan = min(srcNode.lowTarjan, destNode.lowTarjan);
+
+            if (srcNode.indexTarjan == 0 && children > 1) {
+                articulationPoints.push_back(src);
+            }
+            if (srcNode.indexTarjan != 0 && destNode.lowTarjan >= srcNode.indexTarjan) {
+                articulationPoints.push_back(src);
+            }
+        }
+        else {
+            srcNode.lowTarjan = min(srcNode.lowTarjan, destNode.indexTarjan);
+        }
+    }
+}
+
+list<string> Graph::articulationPoints() {
+    list<string> articulationPoints;
+    setAllNodesUnvisited();
+    setAllNodesIndexTarjan();
+    setAllNodesLowTarjan();
+
+    int counter = 0;
+    for (auto &i : nodes) {
+        if (!i.second.visited) {
+            dfsArticulationPoints(i.first, articulationPoints);
         }
     }
 
+    return articulationPoints;
+}
+
+void Graph::dfsTarjan(const string& src, int& counter, stack<string>& stack, list<list<string>>& scc) {
+
+    auto& srcNode = nodes[src];
+    srcNode.indexTarjan = srcNode.lowTarjan = counter++;
+    stack.push(src);
+    srcNode.visited = true;
+
+
+    for (auto& i : srcNode.adj) {
+        if (nodes[i.destination].indexTarjan == -1) {
+            dfsTarjan(i.destination, ++counter, stack, scc);
+            srcNode.lowTarjan = min(srcNode.lowTarjan, nodes[i.destination].lowTarjan);
+        }
+
+        else if (nodes[i.destination].visited) {
+            srcNode.lowTarjan = min(srcNode.lowTarjan, nodes[i.destination].indexTarjan);
+        }
+    }
+
+    if (srcNode.lowTarjan == srcNode.indexTarjan) {
+        list<string> component;
+        string w;
+        do {
+            w = stack.top();
+            stack.pop();
+            nodes[w].visited = false;
+            component.push_back(w);
+        } while (w != src);
+        scc.push_back(component);
+    }
+}
+
+list<list<string>> Graph::stronglyConnectedComponents() {
+
+    setAllNodesUnvisited();
+    setAllNodesIndexTarjan();
+    setAllNodesLowTarjan();
+
+    int index = 0;
+    stack<string> stack;
+    list<list<string>> scc;
+
+    for (auto& i : nodes) {
+        if (i.second.indexTarjan == -1) {
+            dfsTarjan(i.first, index, stack, scc);
+        }
+    }
+    return scc;
 }
 
 void Graph::bfs(const string& src) {
@@ -91,8 +184,6 @@ void dfsArticulationPoints (int v) {
 void Graph::dfsBestPaths(const string& src, const string& dest, set<pair<int, vector<string>>>& bestPaths, vector<string>& path, int distanceSum) {
 
     path[nodes[src].distance] = src;
-    distanceSum += Calc::haversine(nodes[src].airport->getLatitude(), nodes[src].airport->getLongitude(),
-                                   nodes[dest].airport->getLatitude(), nodes[dest].airport->getLongitude());
 
     if (src == dest) bestPaths.insert({distanceSum, path});
 
@@ -100,9 +191,10 @@ void Graph::dfsBestPaths(const string& src, const string& dest, set<pair<int, ve
 
     for (auto& e : nodes[src].adj) {
         string next = e.destination;
+
         if (!nodes[next].visited && nodes[next].distance == nodes[src].distance + 1 && nodes[next].distance < path.size()) {
 
-            dfsBestPaths(next, dest, bestPaths, path, distanceSum);
+            dfsBestPaths(next, dest, bestPaths, path, distanceSum + e.distanceKms);
         }
     }
     nodes[src].visited = false;
@@ -126,7 +218,7 @@ const unordered_map<string, Graph::Node>& Graph::getNodes() const {
     return nodes;
 }
 
-list<string> Graph::airportsInCity(const string& city) const {
+list<string> Graph::getAirportsInCity(const string& city) const {
 
     list<string> aeroportos;
 
@@ -138,7 +230,7 @@ list<string> Graph::airportsInCity(const string& city) const {
     return aeroportos;
 }
 
-list<string> Graph::airportsInCountry(const string& country) const {
+list<string> Graph::getAirportsInCountry(const string& country) const {
 
     list<string> aeroportos;
 
@@ -150,7 +242,7 @@ list<string> Graph::airportsInCountry(const string& country) const {
     return aeroportos;
 }
 
-set<pair<int, string>>Graph::airportsNearLocation(const double latitude, const double longitude, const double radius) const {
+set<pair<int, string>>Graph::getAirportsNearLocation(const double latitude, const double longitude, const double radius) const {
 
     set<pair<int, string>> aeroportos;
 
@@ -164,32 +256,12 @@ set<pair<int, string>>Graph::airportsNearLocation(const double latitude, const d
     return aeroportos;
 }
 
-int Graph::getNumberFlightsFromAirport(const string &airportCode) {
+unsigned Graph::getNumberFlightsFromAirport(const string &airportCode) {
     return nodes.at(airportCode).adj.size();;
 }
 
-int Graph::connectedComponents() {
-    int nmbOfComponents = 0;
-    setAllNodesUnvisited();
-
-    for (auto& i : nodes) {
-        if (!nodes[i.first].visited) {
-            cout << i.first << " ";
-            nmbOfComponents++;
-
-            int counter = 1;
-            dfs(i.first, counter);
-            cout << counter << endl;
-        }
-    }
-    return nmbOfComponents;
-}
 
 int Graph::diameter() {
-
-    int diameter = 0;
-
-    nodes["OPO"].visited = true;
 
 }
 

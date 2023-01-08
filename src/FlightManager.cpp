@@ -95,7 +95,7 @@ void FlightManager::readFlightsFile(bool include, const list<string>& airlinesCh
         getline(input, target, ',');
         getline(input, airline, '\r');
 
-        if (!airlinesChosen.size()) {
+        if (airlinesChosen.empty()) {
             graph.addEdge(source, target, airline);
             continue;
         }
