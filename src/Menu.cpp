@@ -163,6 +163,61 @@ void Menu::routeMenu() {
         cin >> command;
         if (command == "0") routeMenu();
     }
+    else if ( command == "2"){
+        string src, dest;
+        cout << "WRITE SOURCE CITY:";
+        cin >> src;
+        cout << "WRITE DESTINATION CITY:";
+        cin >> dest;
+        list<string> srcAirports = fm.getGraph().airportsInCity(src);
+        list<string> destAirports = fm.getGraph().airportsInCity(dest);
+        set<pair<int, vector<string>>> paths = {};
+        set<pair<int, vector<string>>> bestPaths = {} ;
+        for (auto &srcAirport : srcAirports) {
+            for (auto &destAirport : destAirports) {
+                fm.getGraph().findBestPaths(srcAirport, destAirport, paths);
+                if (paths.begin()->second.size() > bestPaths.begin()->second.size()) bestPaths = paths;
+            }
+        }
+        cout << "BEST ROUTES FROM " << src << " TO " << dest << ":\n";
+        for (auto &bestPath : bestPaths) {
+            cout << "- ROUTE :\n";
+            cout << "    ";
+            for (auto &airport : bestPath.second) {
+                cout << airport << ' ' << fm.getGraph().getNodes().at(airport).airport->getName() << " --> ";
+            }
+            cout << "\b\b\b\b";
+            cout << " DISTANCE: " << bestPath.first << " KM\n";
+
+        }
+        cout << "PRESS 0 TO CONTINUE";
+        cin >> command;
+        if (command == "0") routeMenu();
+
+    }
+    else if ( command == "3"){
+        string src, dest;
+        cout << "WRITE SOURCE AIRPORT:";
+        cin >> src;
+        cout << "WRITE DESTINATION CITY:";
+        cin >> dest;
+        set<pair<int, vector<string>>> bestPaths ;
+        fm.getGraph().findBestPaths(src, dest, bestPaths);
+        cout << "BEST ROUTES FROM " << src << " TO " << dest << ":\n";
+        for (auto &bestPath : bestPaths) {
+            cout << "- ROUTE :\n";
+            cout << "    ";
+            for (auto &airport : bestPath.second) {
+                cout << airport << ' ' << fm.getGraph().getNodes().at(airport).airport->getName() << " --> ";
+            }
+            cout << "\b\b\b\b";
+            cout << " DISTANCE: " << bestPath.first << " KM\n";
+        }
+        cout << "PRESS 0 TO CONTINUE";
+        cin >> command;
+        if (command == "0") routeMenu();
+
+    }
 }
 
 void Menu::airportMenu() {
