@@ -4,7 +4,6 @@
 
 #include "../headers/Graph.h"
 #include <queue>
-#include <iostream>
 #include <algorithm>
 #include <list>
 #include <string>
@@ -59,33 +58,29 @@ void Graph::setAllNodesLowTarjan() {
     }
 }
 
-void Graph::dfsArticulationPoints(const string& src, list<string>& articulationPoints) {
+void Graph::dfsArticulationPoints(const string& src, int& counter, stack<string>& stack, list<string>& articulationPoints) {
     auto &srcNode = nodes[src];
     srcNode.visited = true;
-    srcNode.lowTarjan = srcNode.indexTarjan;
-
-    int children = 0;
+    srcNode.lowTarjan = srcNode.indexTarjan = counter++;
+    stack.push(src);
 
     for (auto &i : srcNode.adj) {
         auto &destNode = nodes[i.destination];
 
-        if (!destNode.visited) {
-            children++;
-            dfsArticulationPoints(i.destination, articulationPoints);
+        if (destNode.indexTarjan == -1) {
+            dfsArticulationPoints(i.destination, counter, stack, articulationPoints);
 
             srcNode.lowTarjan = min(srcNode.lowTarjan, destNode.lowTarjan);
 
-            if (srcNode.indexTarjan == 0 && children > 1) {
-                articulationPoints.push_back(src);
-            }
             if (srcNode.indexTarjan != 0 && destNode.lowTarjan >= srcNode.indexTarjan) {
                 articulationPoints.push_back(src);
             }
         }
-        else {
+        else if (destNode.visited){
             srcNode.lowTarjan = min(srcNode.lowTarjan, destNode.indexTarjan);
         }
     }
+    stack.pop();
 }
 
 list<string> Graph::articulationPoints() {
@@ -95,9 +90,11 @@ list<string> Graph::articulationPoints() {
     setAllNodesLowTarjan();
 
     int counter = 0;
+    stack<string> stack;
+
     for (auto &i : nodes) {
         if (!i.second.visited) {
-            dfsArticulationPoints(i.first, articulationPoints);
+            dfsArticulationPoints(i.first, counter, stack, articulationPoints);
         }
     }
 
@@ -113,17 +110,19 @@ void Graph::dfsTarjan(const string& src, int& counter, stack<string>& stack, lis
 
 
     for (auto& i : srcNode.adj) {
-        if (nodes[i.destination].indexTarjan == -1) {
+        if (nodes[i.destination].indexTarjan == -1) { // Not yet visited
             dfsTarjan(i.destination, ++counter, stack, scc);
             srcNode.lowTarjan = min(srcNode.lowTarjan, nodes[i.destination].lowTarjan);
         }
 
-        else if (nodes[i.destination].visited) {
+        else if (nodes[i.destination].visited) { // It is in stack and in current scc
             srcNode.lowTarjan = min(srcNode.lowTarjan, nodes[i.destination].indexTarjan);
         }
+
+        // It was not in stack, so it is from a different scc, ignore
     }
 
-    if (srcNode.lowTarjan == srcNode.indexTarjan) {
+    if (srcNode.lowTarjan == srcNode.indexTarjan) { // Root node, pop the stack and generate the scc
         list<string> component;
         string w;
         do {
@@ -147,7 +146,7 @@ list<list<string>> Graph::stronglyConnectedComponents() {
     list<list<string>> scc;
 
     for (auto& i : nodes) {
-        if (i.second.indexTarjan == -1) {
+        if (i.second.indexTarjan == -1) { // If has undefined index
             dfsTarjan(i.first, index, stack, scc);
         }
     }
@@ -263,16 +262,14 @@ unsigned Graph::getNumberFlightsFromAirport(const string &airportCode) {
 
 int Graph::diameter() {
 
+    int diameter = 0;
+    for (auto& i : nodes) {
+        bfs(i.first);
+        for (auto& j : nodes) {
+            if (j.second.distance > diameter) {
+                diameter = j.second.distance;
+            }
+        }
+    }
+    return diameter;
 }
-
-
-
-
-
-
-
-
-
-
-
-

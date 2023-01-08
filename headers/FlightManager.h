@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include<string>
 #include "Airport.h"
+#include "Airline.h"
 #include "Graph.h"
 
 #ifndef AED_TP2_FLIGHTMANAGER_H

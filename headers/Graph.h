@@ -19,9 +19,9 @@ class Graph {
 
 private:
     struct Edge {
-        std::string destination;    //dest
+        std::string destination;  //dest
         std::list<std::string> airlines;
-        int distanceKms;                           //weight
+        int distanceKms;          //weight
     };
     struct Node{
         Airport* airport;         //src
@@ -48,7 +48,7 @@ public:
     void setAllNodesIndexTarjan();
     void setAllNodesLowTarjan();
 
-    void dfsArticulationPoints(const std::string& src, std::list<std::string>& articulationPoints);
+    void dfsArticulationPoints(const std::string& src, int& counter, std::stack<std::string>& stack, std::list<std::string>& articulationPoints);
     void dfsTarjan(const std::string& src, int& counter, std::stack<std::string>& stack, std::list<std::list<std::string>>& scc);
     std::list<std::string> articulationPoints();
     std::list<std::list<std::string>> stronglyConnectedComponents();

@@ -2,9 +2,7 @@
 // Created by belchior on 28-12-2022.
 //
 #include <vector>
-#include "Airline.h"
-
-
+#include<string>
 
 #ifndef AED_TP2_AIRPORT_H
 #define AED_TP2_AIRPORT_H
