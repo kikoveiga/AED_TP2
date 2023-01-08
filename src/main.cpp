@@ -7,6 +7,7 @@ int main() {
 
     FlightManager fm;
     Graph grafo = fm.getGraph();
+    auto nodes = grafo.getNodes();
     
     int resposta = 0;
 
@@ -17,26 +18,22 @@ int main() {
             resposta += j.airlines.size();
         }
     }
-    cout << resposta << " voos" << endl;
+    cout << resposta << " voos" << endl << endl;
 
-    set<pair<int, string>> aeroportos = grafo.airportsNearLocation(38.7742, -9.1342, 300);
+    list<list<string>> scc = grafo.stronglyConnectedComponents();
 
-    for (auto i : aeroportos) {
-        cout << i.second << " " << i.first << endl;
-    }
-    cout << endl;
+    cout << "Strongly Connected Components: " << scc.size() << endl;
 
-    set<pair<int, vector<string>>> caminhos;
-
-    grafo.findBestPaths("OPO", "MIA", caminhos);
-
-    for (auto i : caminhos) {
-        cout << i.first << " ";
-        for (auto j : i.second) {
+    for (auto i : scc) {
+        cout << i.size() << "Componente: ";
+        for (auto j : i) {
             cout << j << " ";
         }
         cout << endl;
     }
+
+
+
 
     //Menu menu;
     //menu.build();

@@ -3,6 +3,7 @@
 //
 
 #include <set>
+#include <stack>
 #include <list>
 #include <map>
 #include <vector>
@@ -27,6 +28,8 @@ private:
         std::list<Edge> adj;
         bool visited;
         int distance;
+        int indexTarjan;
+        int lowTarjan;
     };
 
     std::unordered_map<std::string, Node> nodes;
@@ -42,21 +45,25 @@ public:
 
     void setAllNodesUnvisited();
     void setAllNodesDistance0();
+    void setAllNodesIndexTarjan();
+    void setAllNodesLowTarjan();
 
-    void dfs(const std::string& src, int& counter);
+    void dfsArticulationPoints(const std::string& src, std::list<std::string>& articulationPoints);
+    void dfsTarjan(const std::string& src, int& counter, std::stack<std::string>& stack, std::list<std::list<std::string>>& scc);
+    std::list<std::string> articulationPoints();
+    std::list<std::list<std::string>> stronglyConnectedComponents();
+
     void bfs(const std::string& src);
-
     void findBestPaths(const std::string& src, const std::string& dest, std::set<std::pair<int, std::vector<std::string>>>& bestPaths);
     void dfsBestPaths(const std::string& src, const std::string& dest, std::set<std::pair<int, std::vector<std::string>>>& bestPaths, std::vector<std::string>& path, int distanceSum);
 
-    int connectedComponents();
     int diameter();
 
 
-    std::list<std::string> airportsInCity(const std::string& city) const;
-    std::list<std::string> airportsInCountry(const std::string& country) const;
-    std::set<std::pair<int, std::string>> airportsNearLocation(double latitude, double longitude, double radius) const;
-    int getNumberFlightsFromAirport(const std::string &airportCode);
+    std::list<std::string> getAirportsInCity(const std::string& city) const;
+    std::list<std::string> getAirportsInCountry(const std::string& country) const;
+    std::set<std::pair<int, std::string>> getAirportsNearLocation(double latitude, double longitude, double radius) const;
+    unsigned getNumberFlightsFromAirport(const std::string &airportCode);
 
 };
 
