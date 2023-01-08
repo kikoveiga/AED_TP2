@@ -97,6 +97,7 @@ void FlightManager::readFlightsFile(bool include, const list<string>& airlinesCh
 
         if (airlinesChosen.empty()) {
             graph.addEdge(source, target, airline);
+            airlines.at(airline)->addFlight();
             continue;
         }
 
@@ -110,14 +111,17 @@ void FlightManager::readFlightsFile(bool include, const list<string>& airlinesCh
                 }
             }
 
-            if (add) graph.addEdge(source, target, airline);
-
+            if (add) {
+                graph.addEdge(source, target, airline);
+                airlines.at(airline)->addFlight();
+            }
             continue;
         }
 
         for (auto& i : airlinesChosen) {
             if (i == airline) {
                 graph.addEdge(source, target, airline);
+                airlines.at(airline)->addFlight();
                 continue;
             }
         }
@@ -130,5 +134,15 @@ Graph& FlightManager::getGraph() {
 
 const unordered_map<std::string, Airline*>& FlightManager::getAirlines() const {
     return airlines;
+}
+
+list<string> FlightManager::getAirlinesFromCountry(const string& country) {
+    list<string> airlinesFromCountry;
+    for (auto& i : airlines) {
+        if (i.second->getCountry() == country) {
+            airlinesFromCountry.push_back(i.first);
+        }
+    }
+    return airlinesFromCountry;
 }
 

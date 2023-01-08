@@ -27,3 +27,11 @@ const string& Airline::getCallsign() const {
 const string& Airline::getCountry() const {
     return country;
 }
+
+unsigned Airline::getNFlights() const {
+    return nFlights;
+}
+
+void Airline::addFlight() {
+    nFlights++;
+}

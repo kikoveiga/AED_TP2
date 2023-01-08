@@ -23,6 +23,7 @@ public:
 
     Graph& getGraph();
     const std::unordered_map<std::string, Airline*>& getAirlines() const;
+    std::list<std::string> getAirlinesFromCountry(const std::string& country);
 };
 
 

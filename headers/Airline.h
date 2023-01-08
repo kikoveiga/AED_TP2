@@ -13,6 +13,7 @@ private:
     std::string name;
     std::string callsign;
     std::string country;
+    unsigned nFlights = 0;
 
 
 public:
@@ -21,6 +22,8 @@ public:
     const std::string& getName() const;
     const std::string& getCallsign() const;
     const std::string& getCountry() const;
+    unsigned getNFlights() const;
+    void addFlight();
 
 };
 
