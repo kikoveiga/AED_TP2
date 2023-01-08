@@ -47,7 +47,7 @@ void Graph::setAllNodesDistance0() {
     }
 }
 
-void Graph::dfs(const string& src) {
+void Graph::dfs(const string& src, int& counter) {
 
     auto& srcNode = nodes[src];
 
@@ -55,7 +55,7 @@ void Graph::dfs(const string& src) {
 
     for (auto& i : srcNode.adj) {
         if (!(nodes[i.destination].visited)) {
-            dfs(i.destination);
+            dfs(i.destination, ++counter);
         }
     }
 
@@ -88,7 +88,7 @@ void dfsArticulationPoints (int v) {
 
 }
 
-void Graph::dfsBestPaths(const string& src, const string& dest, map<int, vector<string>>& bestPaths, vector<string>& path, int distanceSum) {
+void Graph::dfsBestPaths(const string& src, const string& dest, set<pair<int, vector<string>>>& bestPaths, vector<string>& path, int distanceSum) {
 
     path[nodes[src].distance] = src;
     distanceSum += Calc::haversine(nodes[src].airport->getLatitude(), nodes[src].airport->getLongitude(),
@@ -108,7 +108,7 @@ void Graph::dfsBestPaths(const string& src, const string& dest, map<int, vector<
     nodes[src].visited = false;
 }
 
-void Graph::findBestPaths(const std::string& src, const std::string& dest, map<int, vector<string>>& bestPaths) {
+void Graph::findBestPaths(const std::string& src, const std::string& dest, set<pair<int, vector<string>>>& bestPaths) {
 
     bfs(src);
 
@@ -138,9 +138,21 @@ list<string> Graph::airportsInCity(const string& city) const {
     return aeroportos;
 }
 
-map<int, string>Graph::airportsNearLocation(const double latitude, const double longitude, const double radius) const {
+list<string> Graph::airportsInCountry(const string& country) const {
 
-    map<int, string> aeroportos;
+    list<string> aeroportos;
+
+    for (auto& i : nodes) {
+        if (i.second.airport->getCountry() == country) {
+            aeroportos.push_back(i.first);
+        }
+    }
+    return aeroportos;
+}
+
+set<pair<int, string>>Graph::airportsNearLocation(const double latitude, const double longitude, const double radius) const {
+
+    set<pair<int, string>> aeroportos;
 
     for (auto& i : nodes) {
 
@@ -157,17 +169,20 @@ int Graph::getNumberFlightsFromAirport(const string &airportCode) {
 }
 
 int Graph::connectedComponents() {
-    int counter = 0;
+    int nmbOfComponents = 0;
     setAllNodesUnvisited();
 
     for (auto& i : nodes) {
         if (!nodes[i.first].visited) {
-            cout << i.first << endl;
-            counter++;
-            dfs(i.first);
+            cout << i.first << " ";
+            nmbOfComponents++;
+
+            int counter = 1;
+            dfs(i.first, counter);
+            cout << counter << endl;
         }
     }
-    return counter;
+    return nmbOfComponents;
 }
 
 int Graph::diameter() {

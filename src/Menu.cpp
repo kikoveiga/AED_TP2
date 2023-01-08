@@ -147,7 +147,7 @@ void Menu::routeMenu() {
         cin >> src;
         cout << "WRITE DESTINATION AIRPORT:";
         cin >> dest;
-        map<int, vector<string>> bestPaths ;
+        set<pair<int, vector<string>>> bestPaths ;
         fm.getGraph().findBestPaths(src, dest, bestPaths);
         cout << "BEST ROUTES FROM " << src << " TO " << dest << ":\n";
         for (auto &bestPath : bestPaths) {
