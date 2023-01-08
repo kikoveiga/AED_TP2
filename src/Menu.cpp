@@ -33,9 +33,9 @@ void Menu::build(){
 
             bool include;
             std::list<std::string> airlinesChosen;
-            cout << "DO YOU WANT TO INCLUDE OR EXCLUDE AIRLINES? (1/0)\n";
+            cout << "DO YOU WANT TO INCLUDE OR EXCLUDE AIRLINES? (0/1)\n";
             cin >> include;
-            if (include) {
+            if (!include) {
                 cout << "ENTER THE AIRLINES YOU WANT TO INCLUDE (ENTER 0 TO FINISH):\n";
                 string airline;
                 cin >> airline;
@@ -52,11 +52,11 @@ void Menu::build(){
                     cin >> airline;
                 }
             }
+            this->fm = FlightManager(include ,airlinesChosen);
             break;
         }
         case 2:{
-            this->flightManager = FlightManager();
-            run();
+            this->fm = FlightManager();
             break;
         }
         case 3:
@@ -65,7 +65,7 @@ void Menu::build(){
             cout << "Invalid command\n";
             build();
     }
-
+    command = "0";
     run();
 }
 void Menu::run() {
@@ -73,16 +73,31 @@ void Menu::run() {
     bool running = true;
     while (running) {
         switch(stoi(command)) {
-            case 1:
+            case 0:
                 mainMenu();
                 break;
+            case 1:
+                routeMenu();
+                command = "0";
+                break;
             case 2:
+                airportMenu();
+                command = "0";
+                break;
+            case 3:
+                airlineMenu();
+                command = "0";
+                break;
+            case 4:
+                networkMenu();
+                command = "0";
+                break;
+            case 5:
+                build();
                 running = false;
                 break;
-
-            case 10:
-                running = false;
-                break;
+            case 6:
+                exit(0);
         }
     }
 }
@@ -92,37 +107,74 @@ void Menu::mainMenu() {
     cout << "-------------------------------------------------\n"
          << "|                 FLIGHT HELPER                 |\n"
          << "|-----------------------------------------------|\n"
-         << "| 1. CHOOSE ROUTE                               |\n"
-         << "| 2. AIRPORT STATS                              |\n"
-         << "| 3. AIRLINE STATS                              |\n"
+         << "| 1. BEST ROUTE                                 |\n"
+         << "| 2. AIRPORT INFO                               |\n"
+         << "| 3. AIRLINE INFO                               |\n"
          << "| 4. NETWORK STATS                              |\n"
-         << "| 5.                                            |\n"
+         << "| 5. GO BACK TO BUILD                           |\n"
          << "| 6. EXIT                                       |\n"
          << "-------------------------------------------------\n";
+
     while (true) {
         cout << "   - OPTION: "; cin >> command;
-        if ( 1 <= stoi(command) && stoi(command) <= 7) break;
+        if ( 1 <= stoi(command) && stoi(command) <= 6) break;
         else cout << "   - INVALID OPTION" << endl;
     }
 }
 
 
-void Menu::menu1() {
+void Menu::routeMenu() {
     cout << "-------------------------------------------------\n"
-         << "|                 FLIGHT HELPER                 |\n"
+         << "|      CHOOSE ONE OF THE FOLLOWING OPTIONS      |\n"
          << "|-----------------------------------------------|\n"
-         << "| 1. CHOOSE ROUTE                               |\n"
-         << "| 2. AIRPORT STATS                              |\n"
-         << "| 3. AIRLINE STATS                              |\n"
-         << "| 4. NETWORK STATS                              |\n"
-         << "| 5.                                            |\n"
+         << "| 1. ROUTE FROM AIRPORT TO AIRPORT              |\n"
+         << "| 2. ROUTE FROM CITY TO CITY                    |\n"
+         << "| 3. ROUTE FROM AIRPORT TO CITY                 |\n"
+         << "| 4. ROUTE FROM CITY TO AIRPORT                 |\n"
+         << "| 5. ROUTE FROM COORDINATES                     |\n"
          << "| 6. EXIT                                       |\n"
          << "-------------------------------------------------\n";
-    while (true) {
+
+
+    while (true){
         cout << "   - OPTION: "; cin >> command;
-        if ( 1 <= stoi(command) && stoi(command) <= 7) break;
+        if ( 1 <= stoi(command) && stoi(command) <= 6) break;
         else cout << "   - INVALID OPTION" << endl;
     }
+    if (command  == "1"){
+        string src, dest;
+        cout << "WRITE SOURCE AIRPORT:";
+        cin >> src;
+        cout << "WRITE DESTINATION AIRPORT:";
+        cin >> dest;
+        map<int, vector<string>> bestPaths ;
+        fm.getGraph().findBestPaths(src, dest, bestPaths);
+        cout << "BEST ROUTES FROM " << src << " TO " << dest << ":\n";
+        for (auto &bestPath : bestPaths) {
+            cout << "- ROUTE :\n";
+            cout << "    ";
+            for (auto &airport : bestPath.second) {
+                cout << airport << ' ' << fm.getGraph().getNodes().at(airport).airport->getName() << " --> ";
+            }
+            cout << "\b\b\b\b";
+            cout << " DISTANCE: " << bestPath.first << " KM\n";
+        }
+        cout << "PRESS 0 TO CONTINUE";
+        cin >> command;
+        if (command == "0") routeMenu();
+    }
+}
+
+void Menu::airportMenu() {
+
+}
+
+void Menu::airlineMenu() {
+
+}
+
+void Menu::networkMenu() {
+
 }
 
 

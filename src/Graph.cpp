@@ -41,9 +41,9 @@ void Graph::setAllNodesUnvisited() {
     }
 }
 
-void Graph::setAllNodesDist0() {
+void Graph::setAllNodesDistance0() {
     for (auto& i : nodes) {
-        i.second.dist = 0;
+        i.second.distance = 0;
     }
 }
 
@@ -54,7 +54,7 @@ void Graph::dfs(const string& src) {
     srcNode.visited = true;
 
     for (auto& i : srcNode.adj) {
-        if (!nodes[i.destination].visited) {
+        if (!(nodes[i.destination].visited)) {
             dfs(i.destination);
         }
     }
@@ -63,7 +63,7 @@ void Graph::dfs(const string& src) {
 
 void Graph::bfs(const string& src) {
 
-    setAllNodesDist0();
+    setAllNodesDistance0();
     setAllNodesUnvisited();
 
     queue<string> q; // queue of unvisited nodes
@@ -78,7 +78,7 @@ void Graph::bfs(const string& src) {
             if (!nodes[w].visited) {
                 q.push(w);
                 nodes[w].visited = true;
-                nodes[w].dist = nodes[u].dist + 1;
+                nodes[w].distance = nodes[u].distance + 1;
             }
         }
     }
@@ -90,7 +90,7 @@ void dfsArticulationPoints (int v) {
 
 void Graph::dfsBestPaths(const string& src, const string& dest, map<int, vector<string>>& bestPaths, vector<string>& path, int distanceSum) {
 
-    path[nodes[src].dist] = src;
+    path[nodes[src].distance] = src;
     distanceSum += Calc::haversine(nodes[src].airport->getLatitude(), nodes[src].airport->getLongitude(),
                                    nodes[dest].airport->getLatitude(), nodes[dest].airport->getLongitude());
 
@@ -100,7 +100,7 @@ void Graph::dfsBestPaths(const string& src, const string& dest, map<int, vector<
 
     for (auto& e : nodes[src].adj) {
         string next = e.destination;
-        if (!nodes[next].visited && nodes[next].dist == nodes[src].dist + 1 && nodes[next].dist < path.size()) {
+        if (!nodes[next].visited && nodes[next].distance == nodes[src].distance + 1 && nodes[next].distance < path.size()) {
 
             dfsBestPaths(next, dest, bestPaths, path, distanceSum);
         }
@@ -108,17 +108,17 @@ void Graph::dfsBestPaths(const string& src, const string& dest, map<int, vector<
     nodes[src].visited = false;
 }
 
-void Graph::findBestPaths(const std::string& src, const std::string& dest, map<int, vector<string>> &bestPaths) {
+void Graph::findBestPaths(const std::string& src, const std::string& dest, map<int, vector<string>>& bestPaths) {
 
     bfs(src);
 
-    if(nodes[dest].dist == 0) {
+    if(nodes[dest].distance == 0) {
         return;
     }
 
     setAllNodesUnvisited();
 
-    vector<string> path(nodes[dest].dist + 1);
+    vector<string> path(nodes[dest].distance + 1);
     dfsBestPaths(src, dest, bestPaths, path, 0);
 }
 
@@ -158,9 +158,11 @@ int Graph::getNumberFlightsFromAirport(const string &airportCode) {
 
 int Graph::connectedComponents() {
     int counter = 0;
+    setAllNodesUnvisited();
 
     for (auto& i : nodes) {
         if (!nodes[i.first].visited) {
+            cout << i.first << endl;
             counter++;
             dfs(i.first);
         }

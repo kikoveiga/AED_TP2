@@ -6,33 +6,18 @@ using namespace std;
 int main() {
 
     FlightManager flightManager;
-
-
     Graph grafo = flightManager.getGraph();
+    
+    int resposta = 0;
 
-    list<string> a1 = grafo.airportsInCity("Dubai");
-    for (auto i : a1) {
-        cout << i << endl;
-    }
-    cout << endl;
-
-    map<int, vector<string>> bestPaths;
-    grafo.findBestPaths("OPO", "DXB", bestPaths);
-    for (auto i : bestPaths) {
-        cout << i.first << ' ';
-        for (auto j : i.second) {
-            cout << j << " ";
+    cout << grafo.getNodes().size() << endl;
+    for (auto i : grafo.getNodes()) {
+        for (auto j : i.second.adj) {
+            resposta += j.airlines.size();
         }
-        cout << endl;
     }
+    cout << resposta;
 
-    map<int, string> aeroportos2 = grafo.airportsNearLocation(41.0, -8.0, 300);
-
-    for (auto i : aeroportos2) {
-        cout << i.first << " " << i.second << endl;
-    }
-
-    //cout << grafo.connectedComponents();
 
     //Menu menu;
     //menu.build();

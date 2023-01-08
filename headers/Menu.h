@@ -13,17 +13,20 @@
 class Menu {
 
 private:
-    FlightManager flightManager;
+    FlightManager fm;
     std::string command;
 
 public:
     explicit Menu();
-    void run();
     void build();
+    void run();
     void mainMenu();
+    void routeMenu();
     void cleanTerminal();
+    void airportMenu();
+    void airlineMenu();
+    void networkMenu();
 
-    void menu1();
 
 };
 

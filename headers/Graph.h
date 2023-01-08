@@ -19,13 +19,13 @@ private:
     struct Edge {
         std::string destination;    //dest
         std::list<std::string> airlines;
-        int distance;                           //weight
+        int distanceKms;                           //weight
     };
     struct Node{
         Airport* airport;         //src
         std::list<Edge> adj;
         bool visited;
-        int dist;
+        int distance;
     };
 
     std::unordered_map<std::string, Node> nodes;
@@ -39,7 +39,7 @@ public:
     void addEdge(const std::string& src, const std::string& dest, const std::string& airline);
 
     void setAllNodesUnvisited();
-    void setAllNodesDist0();
+    void setAllNodesDistance0();
 
     void dfs(const std::string& src);
     void bfs(const std::string& src);
