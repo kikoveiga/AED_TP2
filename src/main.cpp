@@ -4,6 +4,7 @@
 using namespace std;
 
 int main() {
+
     /*
     FlightManager fm;
     Graph grafo = fm.getGraph();
@@ -32,12 +33,12 @@ int main() {
         cout << endl;
     }
 
-    list<string> pontosArticulacao = grafo.articulationPoints();
+    set<string> pontosArticulacao = grafo.articulationPoints();
     cout << pontosArticulacao.size();
 
     */
 
     Menu menu;
-    menu.build();
+    menu.run();
     return 0;
 }

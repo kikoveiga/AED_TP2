@@ -18,21 +18,27 @@ bool isDouble(const string& s) {
     int counterDot = 0;
     int counterNumber = 0;
     bool afterDot = false;
+    bool negative = false;
 
     for (char c : s) {
-        if (!isdigit(c) && c != '.') return false;
 
-        if (c == '.') counterDot++;
+        if (!isdigit(c) && c != '.' && c != '-') return false;
+        if (c == '-' && (negative || counterNumber)) return false;
+
+
+        if (c == '-') negative = true;
+        else if (c == '.') counterDot++;
         else {
             if(counterDot == 1) afterDot = true;
             counterNumber++;
         }
     }
-    return (counterDot == 1 && counterNumber > 0 && afterDot);
+    if (!counterDot) afterDot = true;
+    return (counterDot <= 1 && counterNumber > 0 && afterDot);
 }
 
 Menu::Menu() {
-    this->command = "0";
+    this->command = "5";
 }
 
 void Menu::cleanTerminal() {
@@ -56,11 +62,18 @@ void Menu::build(){
         case 1:{
 
             bool include;
-            std::list<std::string> airlinesChosen;
-            cout << "DO YOU WANT TO INCLUDE OR EXCLUDE AIRLINES? (0/1)\n";
-            cin >> include;
-            if (!include) {
-                cout << "ENTER THE AIRLINES YOU WANT TO INCLUDE (ENTER 0 TO FINISH):\n";
+            list<string> airlinesChosen;
+
+            while (true) {
+                cout << "DO YOU WANT TO INCLUDE OR EXCLUDE AIRLINES? (0/1)\n";cin >> command;
+                if (command == "0" || command == "1") break;
+            }
+
+            if (command == "0") include = true;
+            else include = false;
+
+            if (include) {
+                cout << "ENTER THE AIRLINES YOU WANT TO INCLUDE (PRESS 0 TO FINISH):\n";
                 string airline;
                 cin >> airline;
                 while (airline != "0") {
@@ -68,7 +81,7 @@ void Menu::build(){
                     cin >> airline;
                 }
             } else {
-                cout << "ENTER THE AIRLINES YOU WANT TO EXCLUDE (ENTER 0 TO FINISH):\n";
+                cout << "ENTER THE AIRLINES YOU WANT TO EXCLUDE (PRESS 0 TO FINISH):\n";
                 string airline;
                 cin >> airline;
                 while (airline != "0") {
@@ -76,6 +89,7 @@ void Menu::build(){
                     cin >> airline;
                 }
             }
+
             this->fm = FlightManager(include ,airlinesChosen);
             break;
         }
@@ -85,7 +99,6 @@ void Menu::build(){
         }
     }
     command = "0";
-    run();
 }
 void Menu::run() {
 
@@ -97,23 +110,18 @@ void Menu::run() {
                 break;
             case 1:
                 routeMenu();
-                command = "0";
                 break;
             case 2:
                 airportMenu();
-                command = "0";
                 break;
             case 3:
                 airlineMenu();
-                command = "0";
                 break;
             case 4:
                 networkMenu();
-                command = "0";
                 break;
             case 5:
                 build();
-                running = false;
                 break;
             case 6:
                 exit(0);
@@ -151,26 +159,27 @@ void Menu::routeMenu() {
          << "| 2. ROUTE FROM CITY TO CITY                    |\n"
          << "| 3. ROUTE FROM AIRPORT TO CITY                 |\n"
          << "| 4. ROUTE FROM CITY TO AIRPORT                 |\n"
-         << "| 5. ROUTE FROM COORDINATES                     |\n"
-         << "| 6. GO BACK                                    |\n"
+         << "| 5. ROUTE FROM LOCATION TO LOCATION            |\n"
+         << "| 6. SEARCH FLIGHT                              |\n"
+         << "| 7. GO BACK                                    |\n"
          << "-------------------------------------------------\n";
 
 
-    while (true){
+    while (true) {
         cout << "   - OPTION: "; cin >> command;
-        if (isNumerical(command) && 1 <= stoi(command) && stoi(command) <= 6) break;
+        if (isNumerical(command) && 1 <= stoi(command) && stoi(command) <= 7) break;
         else cout << "   - INVALID OPTION" << endl;
     }
     if (command  == "1"){ // Airport->Airport
         string src, dest;
         while (true) {
-            cout << "WRITE SOURCE Airport:";
+            cout << "ENTER SOURCE AIRPORT: ";
             cin >> src;
             if (fm.getGraph().getNodes().find(src) != fm.getGraph().getNodes().end()) break;
             cout << "   - INVALID CITY" << endl;
         }
         while (true) {
-            cout << "WRITE DESTINATION Airport:";
+            cout << "ENTER DESTINATION AIRPORT: ";
             cin >> dest;
             if (fm.getGraph().getNodes().find(dest) != fm.getGraph().getNodes().end()) break;
             cout << "   - INVALID CITY" << endl;
@@ -187,9 +196,10 @@ void Menu::routeMenu() {
             cout << "\b\b\b\b";
             cout << " DISTANCE: " << bestPath.first << " KM\n";
         }
-        cout << "PRESS 0 TO CONTINUE";
-        cin >> command;
-        if (command == "0") routeMenu();
+        while (true) {
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
+        }
     }
 
     else if ( command == "2"){ // City->City
@@ -198,188 +208,266 @@ void Menu::routeMenu() {
         list<string> destAirports;
 
         while (true) {
-            cout << "WRITE SOURCE CITY:";
+            cout << "ENTER SOURCE CITY: ";
             getline(cin >> ws, src);
             srcAirports = fm.getGraph().getAirportsInCity(src);
             if (!srcAirports.empty()) break;
             cout << "   - INVALID CITY" << endl;
         }
         while (true) {
-            cout << "WRITE DESTINATION CITY:";
+            cout << "ENTER DESTINATION CITY: ";
             getline(cin >> ws, dest);
             destAirports = fm.getGraph().getAirportsInCity(dest);
             if (!destAirports.empty()) break;
             cout << "   - INVALID CITY" << endl;
         }
 
-        set<pair<int, vector<string>>> paths = {};
-        pair<int, vector<string>> bestPath = {0, {}} ;
-        for (auto &srcAirport : srcAirports) {
-            for (auto &destAirport : destAirports) {
-                fm.getGraph().findBestPaths(srcAirport, destAirport, paths);
-                if (bestPath.first == 0 || paths.begin()->second.size() < bestPath.second.size()) bestPath = *paths.begin();
+        set<pair<int, vector<string>>> bestPaths = {};
+
+        for (auto& i : srcAirports) {
+            for (auto& j : destAirports) {
+                fm.getGraph().findBestPaths(i, j, bestPaths);
             }
         }
-        cout << "BEST ROUTES FROM " << src << " TO " << dest << ":\n";
-        cout << "- ROUTE :\n";
-        cout << "    ";
-        for (auto &airport : bestPath.second) {
-            cout << airport << ' ' << fm.getGraph().getNodes().at(airport).airport->getName() << " --> ";
-        }
-        cout << "\b\b\b\b\n";
-        cout << "    DISTANCE " << bestPath.first << " KM\n";
-        cout << "PRESS 0 TO CONTINUE";
-        cin >> command;
-        if (command == "0") routeMenu();
+        int nFlights = bestPaths.begin()->second.size();
 
+        cout << "BEST ROUTES FROM " << src << " TO " << dest << ":\n";
+
+        for (auto &bestPath : bestPaths) {
+            if (nFlights == bestPath.second.size()) {
+                cout << "- ROUTE :\n";
+                cout << "    ";
+                for (auto &airport : bestPath.second) {
+                    cout << airport << ' ' << fm.getGraph().getNodes().at(airport).airport->getName() << " --> ";
+                }
+                cout << "\b\b\b\b";
+                cout << " DISTANCE: " << bestPath.first << " KM\n";
+            }
+        }
+
+
+        while (true) {
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
+        }
     }
     else if ( command == "3"){ // Aiport->City
         string src, dest;
         list<string> destAirports;
         while (true) {
-            cout << "WRITE SOURCE Airport:";
+            cout << "ENTER SOURCE AIRPORT: ";
             cin >> src;
             if (fm.getGraph().getNodes().find(src) != fm.getGraph().getNodes().end()) break;
             cout << "   - INVALID CITY" << endl;
         }
         while (true) {
-            cout << "WRITE DESTINATION CITY:";
+            cout << "ENTER DESTINATION CITY: ";
             getline(cin >> ws, dest);
             destAirports = fm.getGraph().getAirportsInCity(dest);
             if (!destAirports.empty()) break;
             cout << "   - INVALID CITY" << endl;
         }
 
-        set<pair<int, vector<string>>> paths = {};
-        pair<int, vector<string>> bestPath = {0, {}} ;
-        for (auto &destAirport : destAirports) {
-            fm.getGraph().findBestPaths(src, destAirport, paths);
-            if (bestPath.first == 0 || paths.begin()->second.size() < bestPath.second.size()) bestPath = *paths.begin();
-        }
-        cout << "BEST ROUTES FROM " << fm.getGraph().getNodes().at(src).airport->getName() << " TO " << dest << ":\n";
-        cout << "- ROUTE :\n";
-        cout << "    ";
-        for (auto &airport : bestPath.second) {
-            cout << airport << ' ' << fm.getGraph().getNodes().at(airport).airport->getName() << " --> ";
-        }
-        cout << "\b\b\b\b\n";
-        cout << "    DISTANCE " << bestPath.first << " KM\n";
-        cout << "PRESS 0 TO CONTINUE";
-        cin >> command;
-        if (command == "0") routeMenu();
+        set<pair<int, vector<string>>> bestPaths = {};
 
+        for (auto& i : destAirports) {
+            fm.getGraph().findBestPaths(src, i, bestPaths);
+        }
+
+        int nFlights = bestPaths.begin()->second.size();
+
+        cout << "BEST ROUTES FROM " << src << " TO " << dest << ":\n";
+
+        for (auto &bestPath : bestPaths) {
+            if (nFlights == bestPath.second.size()) {
+                cout << "- ROUTE :\n";
+                cout << "    ";
+                for (auto &airport : bestPath.second) {
+                    cout << airport << ' ' << fm.getGraph().getNodes().at(airport).airport->getName() << " --> ";
+                }
+                cout << "\b\b\b\b";
+                cout << " DISTANCE: " << bestPath.first << " KM\n";
+            }
+        }
+
+        while (true) {
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
+        }
     }
     else if ( command == "4"){ // City->Airport
         string src, dest;
         list<string> srcAirports;
         while (true) {
-            cout << "WRITE SOURCE CITY:";
+            cout << "ENTER SOURCE CITY: ";
             getline(cin >> ws, src);
             srcAirports = fm.getGraph().getAirportsInCity(src);
             if (!srcAirports.empty()) break;
             cout << "   - INVALID CITY" << endl;
         }
         while (true) {
-            cout << "WRITE DESTINATION Airport:";
+            cout << "ENTER DESTINATION AIRPORT: ";
             cin >> dest;
             if (fm.getGraph().getNodes().find(dest) != fm.getGraph().getNodes().end()) break;
             cout << "   - INVALID CITY" << endl;
         }
 
-        set<pair<int, vector<string>>> paths = {};
-        pair<int, vector<string>> bestPath = {0, {}} ;
-        for (auto &srcAirport : srcAirports) {
-            fm.getGraph().findBestPaths(srcAirport, dest, paths);
-            if (bestPath.first == 0 || paths.begin()->second.size() < bestPath.second.size()) bestPath = *paths.begin();
-        }
-        cout << "BEST ROUTES FROM " << src << " TO " << fm.getGraph().getNodes().at(dest).airport->getName() << ":\n";
-        cout << "- ROUTE :\n";
-        cout << "    ";
-        for (auto &airport : bestPath.second) {
-            cout << airport << ' ' << fm.getGraph().getNodes().at(airport).airport->getName() << " --> ";
-        }
-        cout << "\b\b\b\b\n";
-        cout << "    DISTANCE " << bestPath.first << " KM\n";
-        cout << "PRESS 0 TO CONTINUE";
-        cin >> command;
-        if (command == "0") routeMenu();
+        set<pair<int, vector<string>>> bestPaths = {};
 
-    }
-    else if ( command == "5"){ // Coordinates->Coordinates
-        double src_lat, src_lon, src_rad, dest_lat, dest_lon, dest_rad;
-        set<pair<int, string>> srcAirports;
-        set<pair<int, string>> destAirports;
+        for (auto& i : srcAirports) {
+            fm.getGraph().findBestPaths(i, dest, bestPaths);
+        }
+
+        int nFlights = bestPaths.begin()->second.size();
+
+        cout << "BEST ROUTES FROM " << src << " TO " << dest << ":\n";
+
+        for (auto &bestPath : bestPaths) {
+            if (nFlights == bestPath.second.size()) {
+                cout << "- ROUTE :\n";
+                cout << "    ";
+                for (auto &airport : bestPath.second) {
+                    cout << airport << ' ' << fm.getGraph().getNodes().at(airport).airport->getName() << " --> ";
+                }
+                cout << "\b\b\b\b";
+                cout << " DISTANCE: " << bestPath.first << " KM\n";
+            }
+        }
+
         while (true) {
-            cout << "WRITE SOURCE LATITUDE:";
-            cin >> src_lat;
-            if (isdigit(src_lat)){
-                cout << "INVALID LATITUDE";
-                break;
-            }
-            cout << "WRITE SOURCE LONGITUDE:";
-            cin >> src_lon;
-            if (isdigit(src_lon)){
-                cout << "INVALID LONGITUDE";
-                break;
-            }
-            cout << "WRITE SOURCE RADIUS:";
-            cin >> src_rad;
-            if (isdigit(isdigit(src_rad))){
-                cout << "INVALID RADIUS";
-                break;
-            }
-            cout << "WRITE DESTINATION LATITUDE:";
-            cin >> dest_lat;
-            if (isdigit(dest_lat)){
-                cout << "INVALID LATITUDE";
-                break;
-            }
-            cout << "WRITE DESTINATION LONGITUDE:";
-            cin >> dest_lon;
-            if (isdigit(dest_lon)){
-                cout << "INVALID LONGITUDE";
-                break;
-            }
-            cout << "WRITE DESTINATION RADIUS:";
-            cin >> dest_rad;
-            if (isdigit(dest_rad)){
-                cout << "INVALID RADIUS";
-                break;
-            }
-            break;
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
         }
-        srcAirports = fm.getGraph().getAirportsNearLocation(src_lat, src_lon, src_rad);
-        destAirports = fm.getGraph().getAirportsNearLocation(dest_lat, dest_lon, dest_rad);
-        set<pair<int, vector<string>>> paths = {};
-        pair<int, vector<string>> bestPath = {0, {}} ;
-        for (auto &srcAirport : srcAirports) {
-            for (auto &destAirport : destAirports) {
-                fm.getGraph().findBestPaths(srcAirport.second, destAirport.second, paths);
-                if (bestPath.first == 0 || paths.begin()->second.size() < bestPath.second.size()) bestPath = *paths.begin();
-            }
-        }
-        string src = *bestPath.second.begin();
-        string dest = *bestPath.second.rbegin();
-        int dist_s, dist_d;
-        for (auto &i : srcAirports) if (i.second == src) dist_s = i.first;
-        for (auto &j : destAirports) if (j.second == dest) dist_d = j.first;
+    }
+    else if ( command == "5"){ // Location->Location
 
-        cout << "BEST ROUTES FROM " << src << " (DISTANCE FROM COORDINATES " <<  dist_s << "KM)"
-        << " TO " << dest << " DISTANCE FROM COORDINATES " <<  dist_d << "KM):\n";
-        cout << "- ROUTE :\n";
-        cout << "    ";
-        for (auto &airport : bestPath.second) {
-            cout << airport << ' ' << fm.getGraph().getNodes().at(airport).airport->getName() << " --> ";
+        while (true) {
+            cout << "   - ENTER SOURCE LATITUDE: "; cin >> command;
+
+            if (isDouble(command) && stod(command) >= -90 && stod(command) <= 90) break;
+            cout << "   - INVALID LATITUDE" << endl;
         }
 
-        cout << "\b\b\b\b\n";
-        cout << "PRESS 0 TO CONTINUE";
-        cin >> command;
-        if (command == "0") routeMenu();
+        double lat1 = stod(command);
+
+        while (true) {
+            cout << "   - ENTER SOURCE LONGITUDE: "; cin >> command;
+            if (isDouble(command) && stod(command) >= -180 && stod(command) <= 180) break;
+            cout << "   - INVALID LONGITUDE" << endl;
+        }
+
+        double lon1 = stod(command);
+
+        while (true) {
+            cout << "   - ENTER SOURCE RADIUS: "; cin >> command;
+            if (isDouble(command) && stod(command) >= 0) break;
+            cout << "   - INVALID RADIUS" << endl;
+        }
+
+        double rad1 = stod(command);
+
+        while (true) {
+            cout << "   - ENTER DESTINATION LATITUDE: "; cin >> command;
+
+            if (isDouble(command) && stod(command) >= -90 && stod(command) <= 90) break;
+            cout << "   - INVALID LATITUDE" << endl;
+        }
+
+        double lat2 = stod(command);
+
+        while (true) {
+            cout << "   - ENTER DESTINATION LONGITUDE: "; cin >> command;
+            if (isDouble(command) && stod(command) >= -180 && stod(command) <= 180) break;
+            cout << "   - INVALID LONGITUDE" << endl;
+        }
+
+        double lon2 = stod(command);
+
+        while (true) {
+            cout << "   - ENTER DESTINATION RADIUS: "; cin >> command;
+            if (isDouble(command) && stod(command) >= 0) break;
+            cout << "   - INVALID RADIUS" << endl;
+        }
+
+        double rad2 = stod(command);
 
 
+        set<pair<int, vector<string>>> bestPaths = {};
+        auto srcAirports = fm.getGraph().getAirportsNearLocation(lat1, lon1, rad1);
+        auto destAirports = fm.getGraph().getAirportsNearLocation(lat2, lon2, rad2);
+
+        for (auto& i : srcAirports) {
+            for (auto& j : destAirports) {
+                fm.getGraph().findBestPaths(i.second, j.second, bestPaths);
+            }
+        }
+        int nFlights = bestPaths.begin()->second.size();
+
+        cout << "BEST ROUTES FROM (" << lat1 << ", " << lon1 <<  ") TO (" << lat2 << ", " << lon2 << "):\n";
+
+        for (auto &bestPath : bestPaths) {
+            if (nFlights == bestPath.second.size()) {
+                cout << "- ROUTE :\n";
+                cout << "    ";
+                for (auto &airport : bestPath.second) {
+                    cout << airport << ' ' << fm.getGraph().getNodes().at(airport).airport->getName() << " --> ";
+                }
+                cout << "\b\b\b\b";
+                cout << " DISTANCE: " << bestPath.first << " KM\n";
+            }
+        }
+
+        while (true) {
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
+        }
+
+    } else if (command == "6") { // Search flight
+
+        while (true) {
+            cout << "ENTER SOURCE AIRPORT: "; cin >> command;
+            if (fm.getGraph().getNodes().find(command) != fm.getGraph().getNodes().end()) break;
+            cout << "INVALID AIRPORT!\n";
+        }
+
+        string src = command;
+
+        while (true) {
+            cout << "ENTER DESTINATION AIRPORT: "; cin >> command;
+            if (fm.getGraph().getNodes().find(command) != fm.getGraph().getNodes().end()) break;
+            cout << "INVALID AIRPORT!" << endl;
+        }
+
+        string dest = command;
+
+        list<string> airlines = fm.getGraph().getAirlinesFromFlight(src, dest);
+        int distance = fm.getGraph().flightDistance(src, dest);
+
+        if (airlines.empty()) cout << "THERE ARE NO FLIGHTS BETWEEN THESE AIRPORTS!\n";
+
+        else {
+            cout << "FLIGHT DISTANCE FROM "  << src << ' ' << fm.getGraph().getNodes().at(src).airport->getName() << " --> "
+                                             << dest<< ' ' << fm.getGraph().getNodes().at(dest).airport->getName() << " IS " << distance << " KMS" << endl;
+
+
+            cout << "THE AVAILABLE AIRLINES ARE: ";
+
+            for (auto &i: airlines) {
+                cout << i << " ";
+            }
+            cout << endl;
+        }
+
+        while (true) {
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
+        }
+    } else if (command == "7") {
+        command = "0";
+        return;
 
     }
+    command = "1";
 }
 
 void Menu::airportMenu() {
@@ -391,16 +479,16 @@ void Menu::airportMenu() {
          << "| 2. NUMBER OF AIRPORTS                         |\n"
          << "| 3. TOP N AIRPORTS WITH MOST FLIGHTS           |\n"
          << "| 4. AIRPORTS FROM CITY                         |\n"
-         << "| 5. AIRPORTS FROM COUNTRIES                    |\n"
+         << "| 5. AIRPORTS FROM COUNTRY                      |\n"
          << "| 6. AIRPORTS FROM COORDINATES                  |\n"
          << "| 7. GO BACK                                    |\n"
          << "-------------------------------------------------\n";
-    while (true){
+    while (true) {
         cout << "   - OPTION: "; cin >> command;
-        if (isNumerical(command) && 1 <= stoi(command) && stoi(command) <= 6) break;
+        if (isNumerical(command) && 1 <= stoi(command) && stoi(command) <= 7) break;
         else cout << "   - INVALID OPTION" << endl;
     }
-    if (command == "1"){
+    if (command == "1"){ // Search Airports
         string code;
         while (true) {
             cout << "   - ENTER AIRPORT CODE: "; cin >> code;
@@ -416,24 +504,28 @@ void Menu::airportMenu() {
         cout << "   - AIRPORT COORDINATES: " << airport->getLatitude() << " " << airport->getLongitude() << endl;
 
         while(true) {
-            cout << "PRESS 0 TO CONTINUE"; cin >> command;
-            if (command == "0") airportMenu();
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
         }
     }
-    else if (command == "2") {
+    else if (command == "2") { // Number of Airports
         cout << "NUMBER OF AIRPORTS: " << fm.getGraph().getNodes().size() << endl;
-        cout << "PRESS 0 TO CONTINUE";
-        cin >> command;
-        if (command == "0") airportMenu();
-    }
-    else if (command == "3") {
-        int n;
+
         while (true) {
-            cout << "WRITE N: ";
-            cin >> n;
-            if (n > 0) break;
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
+        }
+
+    }
+    else if (command == "3") { // Top N Airports with most flights
+
+        while (true) {
+            cout << "ENTER N: "; cin >> command;
+            if (isNumerical(command) && stoi(command) > 0) break;
             cout << "   - INVALID N" << endl;
         }
+        int n = stoi(command);
+
         set<pair<int, string>> airports_n_flights;
         for(auto &i : fm.getGraph().getNodes()){
             airports_n_flights.insert({fm.getGraph().getNumberFlightsFromAirport(i.first), i.first});
@@ -447,15 +539,15 @@ void Menu::airportMenu() {
         }
 
         while(true) {
-            cout << "PRESS 0 TO CONTINUE"; cin >> command;
-            if (command == "0") airportMenu();
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
         }
     }
-    else if (command == "4") {
+    else if (command == "4") { // Airports from City
         string city;
         while (true) {
-            cout << "WRITE CITY: ";
-            cin >> city;
+            cout << "ENTER CITY: ";
+            getline(cin >> ws, city);
             if (!fm.getGraph().getAirportsInCity(city).empty()) break;
             cout << "   - INVALID CITY" << endl;
         }
@@ -463,19 +555,19 @@ void Menu::airportMenu() {
 
         cout << "AIRPORTS FROM CITY " << city << ":\n";
         for (auto &i : airports_city) {
-            cout << "- " << i << ' ' << fm.getGraph().getNodes().at(i).airport->getName() << endl;
+            cout << "   - " << i << ' ' << fm.getGraph().getNodes().at(i).airport->getName() << endl;
         }
-        cout << "PRESS 0 TO CONTINUE";
+
         while(true) {
-            cout << "PRESS 0 TO CONTINUE"; cin >> command;
-            if (command == "0") airportMenu();
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
         }
     }
-    else if (command == "5") {
+    else if (command == "5") { // Airports from Country
         string country;
         while (true) {
-            cout << "WRITE COUNTRY: ";
-            cin >> country;
+            cout << "ENTER COUNTRY: ";
+            getline(cin >> ws, country);
             if (!fm.getGraph().getAirportsInCountry(country).empty()) break;
             cout << "   - INVALID COUNTRY" << endl;
         }
@@ -483,19 +575,19 @@ void Menu::airportMenu() {
 
         cout << "AIRPORTS FROM COUNTRY " << country << ":\n";
         for (auto &i : airports_country) {
-            cout << "- " << i << ' ' << fm.getGraph().getNodes().at(i).airport->getName() << endl;
+            cout << "   - " << i << ' ' << fm.getGraph().getNodes().at(i).airport->getName() << endl;
         }
 
         while(true) {
-            cout << "PRESS 0 TO CONTINUE"; cin >> command;
-            if (command == "0") airportMenu();
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
         }
     }
-    else if (command == "6") {
+    else if (command == "6") { // Airports from Coordinates
         while (true) {
             cout << "   - ENTER LATITUDE: "; cin >> command;
 
-            if (isNumerical(command) && stod(command) >= -90 && stod(command) <= 90) break;
+            if (isDouble(command) && stod(command) >= -90 && stod(command) <= 90) break;
             else cout << "   - INVALID LATITUDE" << endl;
         }
 
@@ -503,7 +595,7 @@ void Menu::airportMenu() {
 
         while (true) {
             cout << "   - ENTER LONGITUDE: "; cin >> command;
-            if ( isNumerical(command) && stod(command) >= -180 && stod(command) <= 180) break;
+            if ( isDouble(command) && stod(command) >= -180 && stod(command) <= 180) break;
             else cout << "   - INVALID LONGITUDE" << endl;
         }
 
@@ -511,30 +603,27 @@ void Menu::airportMenu() {
 
         while (true) {
             cout << "   - ENTER RADIUS: "; cin >> command;
-            if ( isNumerical(command) && stod(command) >= 0) break;
+            if ( isDouble(command) && stod(command) >= 0) break;
             else cout << "   - INVALID RADIUS" << endl;
         }
 
         double rad = stod(command);
 
         auto airports = fm.getGraph().getAirportsNearLocation(lat, lon, rad);
-        cout << "   - AIRPORTS FROM COORDINATES (" << lat << ", " << lon << ") WITH RADIUS " << rad << "KM" << endl;
+        cout << "AIRPORTS FROM COORDINATES (" << lat << ", " << lon << ") WITH RADIUS " << rad << "KM:" << endl;
         for (auto& airport : airports) {
             cout << "   - " << airport.second << " - " << airport.first << "KM" << endl;
         }
-        cout << "PRESS 0 TO CONTINUE";
-        cin >> command;
-        if (command == "0") airportMenu();
+
         while(true) {
-            cout << "PRESS 0 TO CONTINUE"; cin >> command;
-            if (command == "0") airportMenu();
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
         }
+    } else if (command == "7") {
+        command = "0";
+        return;
     }
-    else if (command == "7") mainMenu();
-    else {
-        cout << "   - INVALID COMMAND" << endl;
-        airportMenu();
-    }
+    command = "2";
 }
 
 void Menu::airlineMenu() {
@@ -543,8 +632,8 @@ void Menu::airlineMenu() {
          << "|                 AIRLINES MENU                 |\n"
          << "|-----------------------------------------------|\n"
          << "| 1. SEARCH AIRLINE                             |\n"
-         << "| 2. TOP N AIRLINES WITH MOST FLIGHTS           |\n"
-         << "| 3. NUMBER OF AIRLINES                         |\n"
+         << "| 2. NUMBER OF AIRLINES                         |\n"
+         << "| 3. TOP N AIRLINES WITH MOST FLIGHTS           |\n"
          << "| 4. AIRLINES FROM COUNTRY                      |\n"
          << "| 5. GO BACK                                    |\n"
          << "-------------------------------------------------\n";
@@ -552,7 +641,7 @@ void Menu::airlineMenu() {
     while (true) {
         cout << "   - OPTION: ";
         cin >> command;
-        if (1 <= stoi(command) && stoi(command) <= 6) break;
+        if (1 <= stoi(command) && stoi(command) <= 5) break;
         else cout << "   - INVALID OPTION" << endl;
     }
 
@@ -572,12 +661,11 @@ void Menu::airlineMenu() {
         cout << "   - AIRLINE COUNTRY: " << airline->getCountry() << endl;
 
         while (true) {
-            cout << "PRESS 0 TO CONTINUE";
-            cin >> command;
-            if (command == "0") airlineMenu();
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
         }
 
-    } else if (command == "2") { // Top N Airlines with most flights
+    } else if (command == "3") { // Top N Airlines with most flights
         while (true) {
             cout << "   - ENTER N: ";
             cin >> command;
@@ -589,7 +677,7 @@ void Menu::airlineMenu() {
         auto airlines = fm.getAirlines();
         set<pair<int, string>> topAirlines = {};
 
-        cout << "   - TOP " << n << " AIRLINES WITH MOST FLIGHTS" << endl;
+        cout << "- TOP " << n << " AIRLINES WITH MOST FLIGHTS" << endl;
         for (auto &airline: airlines) {
             topAirlines.insert({airline.second->getNFlights(), airline.first});
         }
@@ -605,17 +693,15 @@ void Menu::airlineMenu() {
         }
 
         while (true) {
-            cout << "PRESS 0 TO CONTINUE";
-            cin >> command;
-            if (command == "0") airlineMenu();
+            cout << "PRESS 0 TO CONTINUE: ";
+            cin >> command; if (command == "0") break;
         }
 
-    } else if (command == "3") { // Number of Airlines
+    } else if (command == "2") { // Number of Airlines
         cout << "   - NUMBER OF AIRLINES: " << fm.getAirlines().size() << endl;
         while (true) {
-            cout << "PRESS 0 TO CONTINUE";
-            cin >> command;
-            if (command == "0") airlineMenu();
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
         }
 
     } else if (command == "4") { // Airlines from Country
@@ -633,28 +719,75 @@ void Menu::airlineMenu() {
         }
 
         while (true) {
-            cout << "PRESS 0 TO CONTINUE";
-            cin >> command;
-            if (command == "0") airlineMenu();
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
         }
 
-    } else if (command == "5") { // Go Back
-        mainMenu();
-    } else if (command == "6") { // Exit
-        exit(0);
+    } else if (command == "5") {
+        command = "0";
+        return;
     }
+    command = "3";
 }
 
 void Menu::networkMenu() {
     cleanTerminal();
     cout << "-------------------------------------------------\n"
-         << "|                 NETWORK MENU                  |\n"
+         << "|                STATISTICS MENU                |\n"
          << "|-----------------------------------------------|\n"
-         << "| 1. NUMBER OF AIRPORTS                         |\n"
-         << "| 2. NUMBER OF AIRLINES                         |\n"
-         << "| 3. NUMBER OF ROUTES                           |\n"
-         << "| 4. GO BACK                                    |\n"
+         << "| 1. NUMBER OF FLIGHTS                          |\n"
+         << "| 2. STRONGLY CONNECTED COMPONENTS              |\n"
+         << "| 3. ARTICULATION POINTS                        |\n"
+         << "| 4. GRAPH DIAMETER                             |\n"
+         << "| 5. GO BACK                                    |\n"
          << "-------------------------------------------------\n";
+
+    while (true) {
+        cout << "   - OPTION: ";
+        cin >> command;
+        if (isNumerical(command) && 1 <= stoi(command) && stoi(command) <= 5) break;
+        else cout << "   - INVALID OPTION" << endl;
+    }
+
+    if (command == "1") { // Number of Flights
+        int count = 0;
+        for (auto& i: fm.getGraph().getNodes()){
+            for(auto& j : i.second.adj) {
+                count += j.airlines.size();
+            }
+        }
+        cout << "   - NUMBER OF FLIGHTS: " << count << endl;
+        while (true) {
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
+        }
+    }
+    else if (command == "2") { // Strongly Connected Components
+        auto scc = fm.getGraph().stronglyConnectedComponents().size();
+        cout << "   - NUMBER OF STRONGLY CONNECTED COMPONENTS - " << scc << endl;
+        while (true) {
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
+        }
+    }
+    else if (command == "3") { // Articulation Points
+
+        set<string> articulationPoints = fm.getGraph().articulationPoints();
+        cout << "   - NUMBER OF ARTICULATION POINTS - " << articulationPoints.size() - 1 << endl;
+        while (true) {
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
+        }
+    }
+    else if (command == "4") { // Graph Diameter
+        cout << "   - GRAPH DIAMETER: " << fm.getGraph().diameter() << endl;
+        while (true) {
+            cout << "PRESS 0 TO CONTINUE: "; cin >> command;
+            if (command == "0") break;
+        }
+    } else if (command == "5") {
+        command = "0";
+        return;
+    }
+    command = "4";
 }
-
-
