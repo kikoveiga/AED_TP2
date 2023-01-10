@@ -174,11 +174,11 @@ public:
     std::set<std::pair<int, std::string>> getAirportsNearLocation(double latitude, double longitude, double radius) const;
 
     /**
-     * @brief Function that returns the number of flights from a given airport
+     * @brief Function that returns the number of destinations from a given airport
      * @param airportCode string with the airport code
-     * @return unsigned with the number of flights
+     * @return unsigned with the number of destinations
      */
-    unsigned getNumberFlightsFromAirport(const std::string &airportCode);
+    unsigned getNumberDestinationsFromAirport(const std::string &airportCode);
 
     /**
      * @brief Function that returns the list of airlines in a given edge

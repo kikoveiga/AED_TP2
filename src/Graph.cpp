@@ -244,7 +244,7 @@ set<pair<int, string>>Graph::getAirportsNearLocation(const double latitude, cons
     return airports;
 }
 
-unsigned Graph::getNumberFlightsFromAirport(const string &airportCode) {
+unsigned Graph::getNumberDestinationsFromAirport(const string &airportCode) {
     return nodes.at(airportCode).adj.size();
 }
 
@@ -291,3 +291,4 @@ int Graph::flightDistance(const string& src, const string& dest) const {
     }
     return distance;
 }
+
